@@ -1,0 +1,157 @@
+@model UIApplication.Models.AnalysisViewModel
+
+@{
+    ViewData["Title"] = "Stock Analysis with AI";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Stock Analysis with AI</h1>
+
+    <div class="row">
+        <!-- Main Analysis Form -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Analyze Stock</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Analyze" method="post">
+                        <div class="mb-3">
+                            <label for="symbol" class="form-label">Stock Symbol</label>
+                            <input type="text" class="form-control" id="symbol" name="symbol" 
+                                   value="@Model.Symbol" placeholder="e.g., AAPL, MSFT, GOOGL" required>
+                            <small class="form-text text-muted">Enter the stock ticker symbol</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="prompt" class="form-label">Analysis Prompt</label>
+                            <textarea class="form-control" id="prompt" name="prompt" rows="4" 
+                                      placeholder="e.g., Analyze the current trend and provide buy/sell recommendations" required>@Model.Prompt</textarea>
+                            <small class="form-text text-muted">Describe what kind of analysis you want</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Analyze Stock
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(Model.Prompt) && !string.IsNullOrEmpty(Model.Symbol))
+                        {
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#saveModal">
+                                Save This Prompt
+                            </button>
+                        }
+                    </form>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @Model.ErrorMessage
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Analysis Results -->
+            @if (!string.IsNullOrEmpty(Model.Analysis))
+            {
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">AI Analysis Results for @Model.Symbol</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="analysis-content">
+                            @Html.Raw(Model.Analysis.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Saved Prompts Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Saved Prompts</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.SavedPrompts.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var savedPrompt in Model.SavedPrompts.OrderByDescending(p => p.CreatedDate))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@savedPrompt.Name</h6>
+                                        <small>@savedPrompt.CreatedDate.ToString("MM/dd/yyyy")</small>
+                                    </div>
+                                    <p class="mb-1"><strong>Symbol:</strong> @savedPrompt.Symbol</p>
+                                    <p class="mb-2 text-muted small">@(savedPrompt.Prompt.Length > 50 ? savedPrompt.Prompt.Substring(0, 50) + "..." : savedPrompt.Prompt)</p>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="LoadPrompt" asp-route-id="@savedPrompt.Id" class="btn btn-outline-primary">
+                                            Load
+                                        </a>
+                                        <form asp-action="DeletePrompt" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@savedPrompt.Id" />
+                                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this saved prompt?')">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No saved prompts yet. Save your first prompt to reuse it later!</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Prompt Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1" aria-labelledby="saveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="SavePrompt" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saveModalLabel">Save Prompt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="prompt" value="@Model.Prompt" />
+                    <input type="hidden" name="symbol" value="@Model.Symbol" />
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name for this saved prompt</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               placeholder="e.g., Apple Trend Analysis" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p><strong>Symbol:</strong> @Model.Symbol</p>
+                        <p><strong>Prompt:</strong> @Model.Prompt</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .analysis-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .list-group-item {
+            margin-bottom: 10px;
+        }
+    </style>
+}
