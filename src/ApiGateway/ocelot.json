@@ -5,8 +5,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "stockdataservice",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/stock/{everything}",
@@ -17,8 +17,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "aianalysis",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/analysis/{everything}",
@@ -26,6 +26,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5000"
+    "BaseUrl": "http://apigateway:8080"
   }
 }
