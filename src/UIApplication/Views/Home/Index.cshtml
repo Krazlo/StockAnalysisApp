@@ -1,4 +1,4 @@
-@model UIApplication.Models.AnalysisViewModel
+﻿@model UIApplication.Models.AnalysisViewModel
 
 @{
     ViewData["Title"] = "Aktieanalyse med AI";
@@ -16,7 +16,7 @@
                         Analyser aktie
                         <span id="loadingIndicator" style="display:none;">
                             <span class="spinner-border spinner-border-sm ms-3" role="status"></span>
-                            <span class="ms-2">Indl?ser...</span>
+                            <span class="ms-2">Indlæser...</span>
                         </span>
                     </h5>
                 </div>
@@ -32,8 +32,8 @@
                         <div class="mb-3">
                             <label for="prompt" class="form-label">Analyseprompt</label>
                             <textarea class="form-control" id="prompt" name="prompt" rows="12"
-                                      placeholder="f.eks. Analyser den nuv?rende trend og giv k?bs-/salgsmuligheder" required>@Model.Prompt</textarea>
-                            <small class="form-text text-muted">Beskriv hvilken type analyse du ?nsker</small>
+                                      placeholder="f.eks. Analyser den nuværende trend og giv købs-/salgsmuligheder" required>@Model.Prompt</textarea>
+                            <small class="form-text text-muted">Beskriv hvilken type analyse du ønsker</small>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -98,7 +98,7 @@
                                     <p class="mb-2 text-muted small">@(savedPrompt.Prompt.Length > 50 ? savedPrompt.Prompt.Substring(0, 50) + "..." : savedPrompt.Prompt)</p>
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a asp-action="LoadPrompt" asp-route-id="@savedPrompt.Id" class="btn btn-outline-primary">
-                                            Indl?s
+                                            Indlæs
                                         </a>
                                         <form asp-action="DeletePrompt" method="post" class="d-inline">
                                             <input type="hidden" name="id" value="@savedPrompt.Id" />
@@ -115,7 +115,7 @@
                     else
 
                     {
-                        <p class="text-muted">Ingen gemte prompts endnu. Gem din f?rste prompt for at genbruge den senere!</p>
+                        <p class="text-muted">Ingen gemte prompts endnu. Gem din første prompt for at genbruge den senere!</p>
                     }
                 </div>
             </div>
