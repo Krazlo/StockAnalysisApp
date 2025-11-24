@@ -47,7 +47,7 @@ namespace StockDataService.Services
             }
 
             var client = _httpClientFactory.CreateClient();
-            var url = $"{baseUrl}?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={apiKey}";
+            var url = $"{baseUrl}?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={apiKey}";
 
             _logger.LogInformation("Fetching stock data for symbol: {Symbol}", symbol);
 
@@ -59,6 +59,7 @@ namespace StockDataService.Services
 
             if (alphaVantageResponse?.TimeSeriesDaily == null || alphaVantageResponse.TimeSeriesDaily.Count == 0)
             {
+                _logger.LogError("Full AlphaVantage response: {Json}", content);
                 throw new InvalidOperationException($"No data returned for symbol: {symbol}");
             }
 

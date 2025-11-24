@@ -12,7 +12,14 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Analyze Stock</h5>
+                    <h5 class="mb-0">
+                        Analyze Stock
+                        @if (Model.IsLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm ms-3" role="status"></span>
+                            <span class="ms-2">Loading...</span>
+                        }
+                    </h5>
                 </div>
                 <div class="card-body">
                     <form asp-action="Analyze" method="post">
@@ -25,7 +32,7 @@
 
                         <div class="mb-3">
                             <label for="prompt" class="form-label">Analysis Prompt</label>
-                            <textarea class="form-control" id="prompt" name="prompt" rows="4" 
+                            <textarea class="form-control" id="prompt" name="prompt" rows="12" 
                                       placeholder="e.g., Analyze the current trend and provide buy/sell recommendations" required>@Model.Prompt</textarea>
                             <small class="form-text text-muted">Describe what kind of analysis you want</small>
                         </div>

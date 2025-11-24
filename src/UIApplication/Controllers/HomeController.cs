@@ -50,8 +50,9 @@ namespace UIApplication.Controllers
 
             try
             {
+                _logger.LogInformation($"Analyzing stock: symbol = {symbol}, prompt = {prompt}");
                 model.IsLoading = true;
-                var analysis = await _apiService.AnalyzeStockAsync(prompt, symbol.ToUpper());
+                var analysis = await _apiService.AnalyzeStockAsync(prompt, symbol.ToUpper());   
                 model.Analysis = analysis;
                 model.IsLoading = false;
             }
