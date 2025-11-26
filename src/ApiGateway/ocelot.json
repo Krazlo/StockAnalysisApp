@@ -10,7 +10,12 @@
         }
       ],
       "UpstreamPathTemplate": "/stock/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "Limit": 5
+      }
     },
     {
       "DownstreamPathTemplate": "/api/analysis/{everything}",
@@ -22,10 +27,19 @@
         }
       ],
       "UpstreamPathTemplate": "/analysis/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "1m",
+        "Limit": 5
+      }
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://apigateway:8080"
+    "BaseUrl": "http://apigateway:8080",
+    "RateLimitOptions": {
+      "DisableRateLimitHeaders": false,
+      "QuotaExceededMessage": "Rate limit exceeded. Slow down."
+    }
   }
 }

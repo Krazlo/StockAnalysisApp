@@ -2,6 +2,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using UIApplication.Models;
 using UIApplication.Services;
+using Ganss.Xss;
+
 
 namespace UIApplication.Controllers
 {
@@ -10,6 +12,7 @@ namespace UIApplication.Controllers
         private readonly IApiService _apiService;
         private readonly ILocalStorageService _localStorageService;
         private readonly ILogger<HomeController> _logger;
+        private HtmlSanitizer sanitizer;
 
         public HomeController(
             IApiService apiService,
@@ -19,6 +22,7 @@ namespace UIApplication.Controllers
             _apiService = apiService;
             _localStorageService = localStorageService;
             _logger = logger;
+            sanitizer = new HtmlSanitizer();
         }
 
         public async Task<IActionResult> Index()
@@ -32,6 +36,7 @@ namespace UIApplication.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Analyze(string prompt, string symbol)
         {
             var savedPrompts = await _localStorageService.GetSavedPromptsAsync();
@@ -53,7 +58,7 @@ namespace UIApplication.Controllers
                 _logger.LogInformation($"Analyzing stock: symbol = {symbol}, prompt = {prompt}");
                 model.IsLoading = true;
                 var analysis = await _apiService.AnalyzeStockAsync(prompt, symbol.ToUpper());   
-                model.Analysis = analysis;
+                model.Analysis = sanitizer.Sanitize(analysis);
                 model.IsLoading = false;
             }
             catch (Exception ex)
@@ -67,6 +72,7 @@ namespace UIApplication.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SavePrompt(string name, string prompt, string symbol)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(prompt) || string.IsNullOrWhiteSpace(symbol))
@@ -87,6 +93,7 @@ namespace UIApplication.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePrompt(string id)
         {
             await _localStorageService.DeletePromptAsync(id);

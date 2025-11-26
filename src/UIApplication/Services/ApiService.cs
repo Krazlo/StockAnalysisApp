@@ -23,7 +23,7 @@ namespace UIApplication.Services
         {
             try
             {
-                var gatewayUrl = _configuration["ApiGateway:BaseUrl"] ?? "http://localhost:5000";
+                var gatewayUrl = _configuration["ApiGateway:BaseUrl"];
                 var client = _httpClientFactory.CreateClient();
 
                 // Step 1: Get stock data with indicators
