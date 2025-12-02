@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using StockDataService.Data;
 using StockDataService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +18,14 @@ builder.Services.AddMemoryCache();
 // Register services
 builder.Services.AddScoped<IStockDataService, StockDataServiceImpl>();
 builder.Services.AddScoped<IIndicatorCalculator, IndicatorCalculator>();
+
+// DB
+builder.Services.AddDbContext<StockDataDbContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 3))
+    ));
+
 
 // Add CORS
 builder.Services.AddCors(options =>
