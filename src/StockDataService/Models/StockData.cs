@@ -1,4 +1,4 @@
-namespace StockDataService.Models
+ namespace StockDataService.Models
 {
     public class StockData
     {

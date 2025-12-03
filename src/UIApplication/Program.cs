@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using UIApplication.Data;
 using UIApplication.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,12 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddSingleton<ILocalStorageService, LocalStorageService>();
 
+// DB
+builder.Services.AddDbContext<UIApplicationDbContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 3))
+    ));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,8 +1,8 @@
-namespace AIAnalysisService.Models
+﻿namespace AIAnalysisService.DTO
 {
-    public class AnalysisResponse
+    public class AnalysisResponseDto
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string Id { get; set; }
         public string Symbol { get; set; } = string.Empty;
         public string Analysis { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }

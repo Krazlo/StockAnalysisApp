@@ -1,4 +1,6 @@
+using AIAnalysisService.Data;
 using AIAnalysisService.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,14 @@ builder.Services.AddHttpClient();
 
 // Register services
 builder.Services.AddScoped<IGeminiService, GeminiService>();
+
+// DB
+builder.Services.AddDbContext<AIAnalysisDbContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 3))
+    ));
+
 
 // Add CORS
 builder.Services.AddCors(options =>
