@@ -2,6 +2,6 @@ namespace UIApplication.Services
 {
     public interface IApiService
     {
-        Task<string> AnalyzeStockAsync(string prompt, string symbol);
+        Task<string> AnalyzeStockAsync(string prompt, string symbol, string exchange);
     }
 }

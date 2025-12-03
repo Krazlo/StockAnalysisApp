@@ -4,6 +4,7 @@ namespace UIApplication.Models
     {
         public string Prompt { get; set; } = string.Empty;
         public string Symbol { get; set; } = string.Empty;
+        public string Exchange { get; set; } = string.Empty;
         public string? Analysis { get; set; }
         public bool IsLoading { get; set; }
         public string? ErrorMessage { get; set; }

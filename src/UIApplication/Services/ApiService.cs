@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.Text;
 using System.Text;
 using System.Text.Json;
 
@@ -19,7 +20,7 @@ namespace UIApplication.Services
             _logger = logger;
         }
 
-        public async Task<string> AnalyzeStockAsync(string prompt, string symbol)
+        public async Task<string> AnalyzeStockAsync(string prompt, string symbol, string exchange)
         {
             try
             {
@@ -28,7 +29,7 @@ namespace UIApplication.Services
 
                 // Step 1: Get stock data with indicators
                 _logger.LogInformation("Fetching stock data for symbol: {Symbol}", symbol);
-                var stockDataUrl = $"{gatewayUrl}/stock/{symbol}";
+                var stockDataUrl = $"{gatewayUrl}/stock/{symbol}?exchange={exchange}";
                 var stockDataResponse = await client.GetAsync(stockDataUrl);
 
                 if (!stockDataResponse.IsSuccessStatusCode)

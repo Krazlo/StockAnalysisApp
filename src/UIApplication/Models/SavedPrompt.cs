@@ -6,6 +6,7 @@ namespace UIApplication.Models
         public string Name { get; set; } = string.Empty;
         public string Prompt { get; set; } = string.Empty;
         public string Symbol { get; set; } = string.Empty;
+        public string Exchange { get; set;} = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 

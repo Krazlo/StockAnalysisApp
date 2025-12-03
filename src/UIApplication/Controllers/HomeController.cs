@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using UIApplication.Models;
 using UIApplication.Services;
 using Ganss.Xss;
+using System.Security.Authentication;
 
 
 namespace UIApplication.Controllers
@@ -37,13 +38,14 @@ namespace UIApplication.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Analyze(string prompt, string symbol)
+        public async Task<IActionResult> Analyze(string prompt, string symbol, string exchange)
         {
             var savedPrompts = await _localStorageService.GetSavedPromptsAsync();
             var model = new AnalysisViewModel
             {
                 Prompt = prompt,
                 Symbol = symbol,
+                Exchange = exchange,
                 SavedPrompts = savedPrompts
             };
 
@@ -57,7 +59,7 @@ namespace UIApplication.Controllers
             {
                 _logger.LogInformation($"Analyzing stock: symbol = {symbol}, prompt = {prompt}");
                 model.IsLoading = true;
-                var analysis = await _apiService.AnalyzeStockAsync(prompt, symbol.ToUpper());   
+                var analysis = await _apiService.AnalyzeStockAsync(prompt, symbol.ToUpper(), exchange.ToUpper());   
                 model.Analysis = sanitizer.Sanitize(analysis);
                 model.IsLoading = false;
             }
@@ -73,7 +75,7 @@ namespace UIApplication.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SavePrompt(string name, string prompt, string symbol)
+        public async Task<IActionResult> SavePrompt(string name, string prompt, string symbol, string exchange)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(prompt) || string.IsNullOrWhiteSpace(symbol))
             {
@@ -85,6 +87,7 @@ namespace UIApplication.Controllers
                 Name = name,
                 Prompt = prompt,
                 Symbol = symbol,
+                Exchange = exchange,
                 CreatedDate = DateTime.Now
             };
 
@@ -115,6 +118,7 @@ namespace UIApplication.Controllers
             {
                 Prompt = prompt.Prompt,
                 Symbol = prompt.Symbol,
+                Exchange = prompt.Exchange,
                 SavedPrompts = savedPrompts
             };
 

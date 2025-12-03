@@ -23,11 +23,19 @@
                 <div class="card-body">
                     <form asp-action="Analyze" method="post" id="analyzeForm">
                         @Html.AntiForgeryToken()
-                        <div class="mb-3">
-                            <label for="symbol" class="form-label">Aktiesymbol</label>
-                            <input type="text" class="form-control" id="symbol" name="symbol"
-                                   value="@Model.Symbol" placeholder="f.eks. AAPL, MSFT, GOOGL" required>
-                            <small class="form-text text-muted">Indtast aktiens ticker-symbol</small>
+                        <div class="mb-3 row align-items-end">
+                            <div class="col-md-6">
+                                <label for="symbol" class="form-label">Aktiesymbol</label>
+                                <input type="text" class="form-control" id="symbol" name="symbol"
+                                       value="@Model.Symbol" placeholder="f.eks. AAPL, MSFT, GOOGL" required>
+                                <small class="form-text text-muted">Indtast aktiens ticker-symbol</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="exchange" class="form-label">Børs</label>
+                                <input type="text" class="form-control" id="exchange" name="exchange"
+                                       value="@Model.Exchange" placeholder="f.eks. US, CO" required>
+                                <small class="form-text text-muted">Indtast børsforkortelse</small>
+                            </div>
                         </div>
 
                         <div class="mb-3">

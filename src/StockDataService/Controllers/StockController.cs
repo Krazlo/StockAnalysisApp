@@ -17,7 +17,7 @@ namespace StockDataService.Controllers
         }
 
         [HttpGet("{symbol}")]
-        public async Task<IActionResult> GetStockData(string symbol)
+        public async Task<IActionResult> GetStockData(string symbol, [FromQuery] string exchange)
         {
             try
             {
@@ -26,7 +26,12 @@ namespace StockDataService.Controllers
                     return BadRequest(new { error = "Symbol is required" });
                 }
 
-                var result = await _stockDataService.GetStockDataWithIndicatorsAsync(symbol.ToUpper());
+                if (string.IsNullOrWhiteSpace(exchange))
+                {
+                    return BadRequest(new { error = "Exchange is required" });
+                }
+
+                var result = await _stockDataService.GetStockDataWithIndicatorsAsync(symbol.ToUpper(), exchange.ToUpper());
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
@@ -42,7 +47,7 @@ namespace StockDataService.Controllers
         }
 
         [HttpGet("{symbol}/indicators")]
-        public async Task<IActionResult> GetStockIndicators(string symbol)
+        public async Task<IActionResult> GetStockIndicators(string symbol, [FromQuery] string exchange)
         {
             try
             {
@@ -51,7 +56,7 @@ namespace StockDataService.Controllers
                     return BadRequest(new { error = "Symbol is required" });
                 }
 
-                var result = await _stockDataService.GetStockDataWithIndicatorsAsync(symbol.ToUpper());
+                var result = await _stockDataService.GetStockDataWithIndicatorsAsync(symbol.ToUpper(), exchange.ToUpper());
                 return Ok(new
                 {
                     symbol = result.Symbol,

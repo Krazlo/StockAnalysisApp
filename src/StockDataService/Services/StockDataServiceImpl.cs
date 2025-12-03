@@ -27,7 +27,7 @@ namespace StockDataService.Services
             _logger = logger;
         }
 
-        public async Task<StockDataWithIndicators> GetStockDataWithIndicatorsAsync(string symbol)
+        public async Task<StockDataWithIndicators> GetStockDataWithIndicatorsAsync(string symbol, string exchange)
         {
             // Check cache first
             string cacheKey = $"stock_{symbol}";
@@ -40,7 +40,9 @@ namespace StockDataService.Services
             // Fetch from EODHD
             var apiKey = _configuration["EODHD:ApiKey"];
             var baseUrl = _configuration["EODHD:BaseUrl"];
-            string exchange = "CO";
+            string from = DateTime.Now.AddYears(-20).ToString("yyyy-MM-dd");
+            string to = DateTime.Now.ToString("yyyy-MM-dd");
+            string period = "d";
 
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -48,17 +50,15 @@ namespace StockDataService.Services
             }
 
             var client = _httpClientFactory.CreateClient();
-            //var url = $"{baseUrl}?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={apiKey}";
-            var url = $"{baseUrl}/eod/{symbol}.{exchange}?api_token=apiKey&fmt=json";
-
-
-            //           private const string source = @"https://eodhistoricaldata.com/api/eod/{0}?from={1}&to={2}&period={3}&fmt=json";
-
+            var url = $"{baseUrl}/eod/{symbol}.{exchange}?from={from}&to={to}&period={period}&fmt=json&api_token={apiKey}";
 
             _logger.LogInformation("Fetching stock data for symbol: {Symbol}", symbol);
 
             var response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ApplicationException($"There was an error while executing the Stock Data Fetch HTTP query. Reason: {response.StatusCode}, {response.ReasonPhrase}");
+            }
 
             var content = await response.Content.ReadAsStringAsync();
             List<EodhdResponse>? eodhdResponse = JsonSerializer.Deserialize<List<EodhdResponse>>(content);
