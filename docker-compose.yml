@@ -15,7 +15,7 @@ services:
     ports:
       - "5001:8080"
     environment:
-      - AlphaVantage__ApiKey=${ALPHAVANTAGE_API_KEY}
+      - EODHD__ApiKey=${EODHD_API_KEY}
 
   aianalysis:
     build: ./src/AIAnalysisService

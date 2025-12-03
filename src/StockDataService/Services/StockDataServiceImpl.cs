@@ -37,17 +37,23 @@ namespace StockDataService.Services
                 return cachedData;
             }
 
-            // Fetch from Alpha Vantage
-            var apiKey = _configuration["AlphaVantage:ApiKey"];
-            var baseUrl = _configuration["AlphaVantage:BaseUrl"];
+            // Fetch from EODHD
+            var apiKey = _configuration["EODHD:ApiKey"];
+            var baseUrl = _configuration["EODHD:BaseUrl"];
+            string exchange = "CO";
 
             if (string.IsNullOrEmpty(apiKey))
             {
-                throw new InvalidOperationException("Alpha Vantage API key is not configured");
+                throw new InvalidOperationException("EODHD API key is not configured");
             }
 
             var client = _httpClientFactory.CreateClient();
-            var url = $"{baseUrl}?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={apiKey}";
+            //var url = $"{baseUrl}?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&apikey={apiKey}";
+            var url = $"{baseUrl}/eod/{symbol}.{exchange}?api_token=apiKey&fmt=json";
+
+
+            //           private const string source = @"https://eodhistoricaldata.com/api/eod/{0}?from={1}&to={2}&period={3}&fmt=json";
+
 
             _logger.LogInformation("Fetching stock data for symbol: {Symbol}", symbol);
 
@@ -55,31 +61,28 @@ namespace StockDataService.Services
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var alphaVantageResponse = JsonSerializer.Deserialize<AlphaVantageTimeSeriesResponse>(content);
+            List<EodhdResponse>? eodhdResponse = JsonSerializer.Deserialize<List<EodhdResponse>>(content);
 
-            if (alphaVantageResponse?.TimeSeriesDaily == null || alphaVantageResponse.TimeSeriesDaily.Count == 0)
+            if (eodhdResponse == null || eodhdResponse.Count == 0)
             {
-                _logger.LogError("Full AlphaVantage response: {Json}", content);
+                _logger.LogError("Full Eodhd response: {Json}", content);
                 throw new InvalidOperationException($"No data returned for symbol: {symbol}");
             }
 
             // Convert to StockData list
             var historicalData = new List<StockData>();
-            foreach (var kvp in alphaVantageResponse.TimeSeriesDaily)
+            foreach (var item in eodhdResponse)
             {
-                if (DateTime.TryParse(kvp.Key, out DateTime date))
+                historicalData.Add(new StockData
                 {
-                    historicalData.Add(new StockData
-                    {
-                        Symbol = symbol,
-                        Date = date,
-                        Open = decimal.Parse(kvp.Value.Open, CultureInfo.InvariantCulture),
-                        High = decimal.Parse(kvp.Value.High, CultureInfo.InvariantCulture),
-                        Low = decimal.Parse(kvp.Value.Low, CultureInfo.InvariantCulture),
-                        Close = decimal.Parse(kvp.Value.Close, CultureInfo.InvariantCulture),
-                        Volume = long.Parse(kvp.Value.Volume, CultureInfo.InvariantCulture)
-                    });
-                }
+                    Symbol = symbol,
+                    Date = item.Date.GetValueOrDefault(),
+                    Open = item.Open.GetValueOrDefault(),
+                    High = item.High.GetValueOrDefault(),
+                    Low = item.Low.GetValueOrDefault(),
+                    Close = item.Close.GetValueOrDefault(),
+                    Volume = item.Volume.GetValueOrDefault()
+                });
             }
 
             // Sort by date descending and get current data
