@@ -60,14 +60,19 @@ namespace StockDataService.Services
                 throw new ApplicationException($"There was an error while executing the Stock Data Fetch HTTP query. Reason: {response.StatusCode}, {response.ReasonPhrase}");
             }
 
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
             var content = await response.Content.ReadAsStringAsync();
-            List<EodhdResponse>? eodhdResponse = JsonSerializer.Deserialize<List<EodhdResponse>>(content);
+            List<EodhdResponse>? eodhdResponse = JsonSerializer.Deserialize<List<EodhdResponse>>(content, options);
 
             if (eodhdResponse == null || eodhdResponse.Count == 0)
             {
                 _logger.LogError("Full Eodhd response: {Json}", content);
                 throw new InvalidOperationException($"No data returned for symbol: {symbol}");
             }
+            _logger.LogInformation($"Fetched {eodhdResponse.Count} lines of data from EODHD");
 
             // Convert to StockData list
             var historicalData = new List<StockData>();
@@ -90,7 +95,7 @@ namespace StockDataService.Services
             var currentData = historicalData.First();
 
             // Calculate indicators
-            var indicators = _indicatorCalculator.CalculateIndicators(historicalData, currentData);
+            StockIndicators indicators = _indicatorCalculator.CalculateIndicators(historicalData, currentData);
 
             var result = new StockDataWithIndicators
             {
@@ -105,6 +110,29 @@ namespace StockDataService.Services
             var cacheExpiration = TimeSpan.FromMinutes(
                 _configuration.GetValue<int>("Caching:StockDataCacheDurationMinutes", 5));
             _cache.Set(cacheKey, result, cacheExpiration);
+
+            _logger.LogInformation($"DEBUG: Indicators: ", indicators);
+            _logger.LogInformation($"SMA_20 = {indicators.SMA_20}");
+            _logger.LogInformation($"SMA_200 = {indicators.SMA_50}");
+            _logger.LogInformation($"SMA_50 = {indicators.SMA_200}");
+            _logger.LogInformation($"EMA_12 = {indicators.EMA_12}");
+            _logger.LogInformation($"EMA_26 = {indicators.EMA_26}");
+            _logger.LogInformation($"RSI_14 = {indicators.RSI_14}");
+            _logger.LogInformation($"MACD_Line = {indicators.MACD_Line}");
+            _logger.LogInformation($"MACD_Signal = {indicators.MACD_Signal}");
+            _logger.LogInformation($"MACD_Histogram = {indicators.MACD_Histogram}");
+            _logger.LogInformation($"BollingerUpper = {indicators.BollingerUpper}");
+            _logger.LogInformation($"BollingerMiddle = {indicators.BollingerMiddle}");
+            _logger.LogInformation($"BollingerLower = {indicators.BollingerLower}");
+            _logger.LogInformation($"AverageVolume_20 = {indicators.AverageVolume_20}");
+            _logger.LogInformation($"VolumeChangePercent = {indicators.VolumeChangePercent}");
+
+            _logger.LogInformation($"CurrentPrice = {indicators.CurrentPrice}");
+            _logger.LogInformation($"DayChangePercent = {indicators.DayChangePercent}");
+            _logger.LogInformation($"Week52High = {indicators.Week52High}");
+            _logger.LogInformation($"Week52Low = {indicators.Week52Low}");
+            _logger.LogInformation($"PriceVsSMA50 = {indicators.PriceVsSMA50}");
+            _logger.LogInformation($"PriceVsSMA200 = {indicators.PriceVsSMA200}");
 
             _logger.LogInformation("Successfully fetched and cached stock data for symbol: {Symbol}", symbol);
 

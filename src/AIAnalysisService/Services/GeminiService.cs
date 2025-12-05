@@ -167,6 +167,30 @@ namespace AIAnalysisService.Services
                 sb.AppendLine($"- Price vs SMA 50: {indicators.PriceVsSMA50}");
                 sb.AppendLine($"- Price vs SMA 200: {indicators.PriceVsSMA200}");
                 sb.AppendLine();
+
+
+                _logger.LogInformation($"DEBUG: Indicators: ", indicators);
+                _logger.LogInformation($"SMA_20 = {indicators.SMA_20}");
+                _logger.LogInformation($"SMA_200 = {indicators.SMA_50}");
+                _logger.LogInformation($"SMA_50 = {indicators.SMA_200}");
+                _logger.LogInformation($"EMA_12 = {indicators.EMA_12}");
+                _logger.LogInformation($"EMA_26 = {indicators.EMA_26}");
+                _logger.LogInformation($"RSI_14 = {indicators.RSI_14}");
+                _logger.LogInformation($"MACD_Line = {indicators.MACD_Line}");
+                _logger.LogInformation($"MACD_Signal = {indicators.MACD_Signal}");
+                _logger.LogInformation($"MACD_Histogram = {indicators.MACD_Histogram}");
+                _logger.LogInformation($"BollingerUpper = {indicators.BollingerUpper}");
+                _logger.LogInformation($"BollingerMiddle = {indicators.BollingerMiddle}");
+                _logger.LogInformation($"BollingerLower = {indicators.BollingerLower}");
+                _logger.LogInformation($"AverageVolume_20 = {indicators.AverageVolume_20}");
+                _logger.LogInformation($"VolumeChangePercent = {indicators.VolumeChangePercent}");
+
+                _logger.LogInformation($"CurrentPrice = {indicators.CurrentPrice}");
+                _logger.LogInformation($"DayChangePercent = {indicators.DayChangePercent}");
+                _logger.LogInformation($"Week52High = {indicators.Week52High}");
+                _logger.LogInformation($"Week52Low = {indicators.Week52Low}");
+                _logger.LogInformation($"PriceVsSMA50 = {indicators.PriceVsSMA50}");
+                _logger.LogInformation($"PriceVsSMA200 = {indicators.PriceVsSMA200}");
             }
 
             sb.AppendLine("Please provide a comprehensive stock analysis based on the above data and the user's prompt.");

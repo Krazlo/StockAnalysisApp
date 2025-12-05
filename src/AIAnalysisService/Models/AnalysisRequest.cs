@@ -31,6 +31,7 @@ namespace AIAnalysisService.Models
         public decimal BollingerLower { get; set; }
         public long AverageVolume_20 { get; set; }
         public decimal VolumeChangePercent { get; set; }
+        public decimal CurrentPrice { get; set; }
         public decimal DayChangePercent { get; set; }
         public decimal Week52High { get; set; }
         public decimal Week52Low { get; set; }
