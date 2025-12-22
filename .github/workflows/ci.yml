@@ -41,12 +41,13 @@ jobs:
       uses: anchore/sbom-action@v0
       with:
         format: cyclonedx-json
+        output-file: 'sbom.json'
 
     - name: Upload SBOM as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: SBOM
-        path: bom.json
+        path: sbom.json
     
     - name: Commit SBOM to Repository
       run: |
