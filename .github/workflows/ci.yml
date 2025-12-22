@@ -38,10 +38,10 @@ jobs:
     - name: Generate .NET SBOM
       run: |
         mkdir -p sbom
-        dotnet tool run cyclonedx dotnet \
-          --output sbom/dotnet-sbom.json \
-          --json \
-          --exclude-test-projects
+        cyclonedx-dotnet \
+        --output sbom/dotnet-sbom.json \
+        --json \
+        --exclude-test-projects
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
