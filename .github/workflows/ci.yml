@@ -41,7 +41,7 @@ jobs:
       uses: CycloneDX/gh-gomod-generate-sbom@v2
       with:
         version: v1
-        args: mod -licenses -json -output bom.json
+        args: mod -licenses -json -output bom.json -e "GOCACHE=/tmp/gocache" \
     
     - name: Upload SBOM as Artifact
       uses: actions/upload-artifact@v4
