@@ -118,9 +118,11 @@ namespace StockDataService.Services
             _logger.LogInformation($"EMA_12 = {indicators.EMA_12}");
             _logger.LogInformation($"EMA_26 = {indicators.EMA_26}");
             _logger.LogInformation($"RSI_14 = {indicators.RSI_14}");
+            _logger.LogInformation($"RSITrend = {indicators.RSITrend}");
             _logger.LogInformation($"MACD_Line = {indicators.MACD_Line}");
             _logger.LogInformation($"MACD_Signal = {indicators.MACD_Signal}");
             _logger.LogInformation($"MACD_Histogram = {indicators.MACD_Histogram}");
+            _logger.LogInformation($"MACDState = {indicators.MACDState}");
             _logger.LogInformation($"BollingerUpper = {indicators.BollingerUpper}");
             _logger.LogInformation($"BollingerMiddle = {indicators.BollingerMiddle}");
             _logger.LogInformation($"BollingerLower = {indicators.BollingerLower}");
@@ -133,6 +135,9 @@ namespace StockDataService.Services
             _logger.LogInformation($"Week52Low = {indicators.Week52Low}");
             _logger.LogInformation($"PriceVsSMA50 = {indicators.PriceVsSMA50}");
             _logger.LogInformation($"PriceVsSMA200 = {indicators.PriceVsSMA200}");
+            _logger.LogInformation($"OBV = {indicators.OBV}");
+            _logger.LogInformation($"OBVTrend = {indicators.OBVTrend}");
+            //TODO: DCF & VBO (Volume On Balance)
 
             _logger.LogInformation("Successfully fetched and cached stock data for symbol: {Symbol}", symbol);
 

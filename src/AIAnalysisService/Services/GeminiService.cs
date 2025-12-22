@@ -144,9 +144,11 @@ namespace AIAnalysisService.Services
 
                 sb.AppendLine("Momentum Indicators:");
                 sb.AppendLine($"- RSI (14-day): {indicators.RSI_14:F2}");
+                sb.AppendLine($"- RSI Trend: {indicators.RSITrend:F2}");
                 sb.AppendLine($"- MACD Line: {indicators.MACD_Line:F2}");
                 sb.AppendLine($"- MACD Signal: {indicators.MACD_Signal:F2}");
                 sb.AppendLine($"- MACD Histogram: {indicators.MACD_Histogram:F2}");
+                sb.AppendLine($"- MACD State: {indicators.MACDState:F2}");
                 sb.AppendLine();
 
                 sb.AppendLine("Bollinger Bands:");
@@ -166,8 +168,11 @@ namespace AIAnalysisService.Services
                 sb.AppendLine($"- 52-Week Low: ${indicators.Week52Low:F2}");
                 sb.AppendLine($"- Price vs SMA 50: {indicators.PriceVsSMA50}");
                 sb.AppendLine($"- Price vs SMA 200: {indicators.PriceVsSMA200}");
-                sb.AppendLine();
 
+                sb.AppendLine("Volume-Based Momentum:");
+                sb.AppendLine($"- On-Balance Volume (OBV): {indicators.OBV:N0}");
+                sb.AppendLine($"- OBV Trend: {indicators.OBVTrend:F2}");
+                sb.AppendLine();
 
                 _logger.LogInformation($"DEBUG: Indicators: ", indicators);
                 _logger.LogInformation($"SMA_20 = {indicators.SMA_20}");

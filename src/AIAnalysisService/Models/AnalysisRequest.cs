@@ -37,5 +37,10 @@ namespace AIAnalysisService.Models
         public decimal Week52Low { get; set; }
         public string PriceVsSMA50 { get; set; } = string.Empty;
         public string PriceVsSMA200 { get; set; } = string.Empty;
+        public List<decimal> OBV { get; set; }
+        // Trends
+        public string OBVTrend { get; set; } = string.Empty;
+        public string RSITrend { get; set; } = string.Empty;
+        public string MACDState { get; set; } = string.Empty;
     }
 }
