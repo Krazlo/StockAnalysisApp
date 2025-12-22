@@ -38,7 +38,7 @@ jobs:
     - name: Generate .NET SBOM
       run: |
         mkdir -p sbom
-        cyclonedx dotnet \
+        dotnet tool run cyclonedx dotnet \
           --output sbom/dotnet-sbom.json \
           --json \
           --exclude-test-projects
