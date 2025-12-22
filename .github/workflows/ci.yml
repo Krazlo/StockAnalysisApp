@@ -35,11 +35,16 @@ jobs:
     - name: Install CycloneDX .NET tool
       run: dotnet tool install --global CycloneDX
 
+    - name: Add .NET tools to PATH
+      run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
     - name: Generate .NET SBOM
-      uses: CycloneDX/gh-dotnet-generate-sbom@v2
-      with:
-         path: .
-         output: sbom/dotnet-sbom.json
+      run: |
+        mkdir -p sbom
+        cyclonedx dotnet \
+        -o sbom/dotnet-sbom.json \
+        --json \
+        --exclude-test-projects
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
