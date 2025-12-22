@@ -14,14 +14,21 @@ namespace MSTests.StockData
     public class CalculateIndicatorsTests
     {
         [TestMethod]
-        public async Task TestMethod1()
+        public async Task TestCalculationDoesSomething()
         {
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
 
-            var content = await File.ReadAllTextAsync("StockData\\json\\eodhd-nkt-sample-response.json");
+            var filePath = Path.Combine(
+                AppContext.BaseDirectory,
+                "StockData",
+                "json",
+                "eodhd-nkt-sample-response.json"
+            );
+
+            var content = await File.ReadAllTextAsync(filePath);
             List<EodhdResponse>? eodhdResponse = JsonSerializer.Deserialize<List<EodhdResponse>>(content, options);
 
             var historicalData = new List<StockDataService.Models.StockData>();
