@@ -1,7 +1,7 @@
 services:
 
   apigateway:
-    image: ghcr.io/Krazlo/apigateway:latest
+    image: ghcr.io/krazlo/apigateway:latest
     build: ./src/ApiGateway
     container_name: apigateway
     ports:
@@ -11,7 +11,7 @@ services:
       - aianalysis
 
   stockdataservice:
-    image: ghcr.io/Krazlo/stockdataservice:latest
+    image: ghcr.io/krazlo/stockdataservice:latest
     build: ./src/StockDataService
     container_name: stockdataservice
     ports:
@@ -20,7 +20,7 @@ services:
       - EODHD__ApiKey=${EODHD_API_KEY}
 
   aianalysis:
-    image: ghcr.io/Krazlo/aianalysis:latest
+    image: ghcr.io/krazlo/aianalysis:latest
     build: ./src/AIAnalysisService
     container_name: aianalysis
     ports:
@@ -29,7 +29,7 @@ services:
       - Gemini__ApiKey=${GEMINI_API_KEY}
 
   uiapp:
-    image: ghcr.io/Krazlo/uiapp:latest
+    image: ghcr.io/krazlo/uiapp:latest
     build: ./src/UIApplication
     container_name: uiapp
     ports:
