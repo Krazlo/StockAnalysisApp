@@ -1,5 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using UIApplication.Data;
 using UIApplication.Models;
 using UIApplication.Services;
 using Ganss.Xss;
@@ -11,42 +15,49 @@ namespace UIApplication.Controllers
     public class HomeController : Controller
     {
         private readonly IApiService _apiService;
-        private readonly ILocalStorageService _localStorageService;
+        private readonly IAnalysisService _analysisService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<HomeController> _logger;
         private HtmlSanitizer sanitizer;
 
         public HomeController(
             IApiService apiService,
-            ILocalStorageService localStorageService,
+            IAnalysisService analysisService,
+            UserManager<ApplicationUser> userManager,
             ILogger<HomeController> logger)
         {
             _apiService = apiService;
-            _localStorageService = localStorageService;
+            _analysisService = analysisService;
+            _userManager = userManager;
             _logger = logger;
             sanitizer = new HtmlSanitizer();
         }
 
         public async Task<IActionResult> Index()
         {
-            var savedPrompts = await _localStorageService.GetSavedPromptsAsync();
-            var model = new AnalysisViewModel
+            var model = new AnalysisViewModel();
+            if (User.Identity.IsAuthenticated)
             {
-                SavedPrompts = savedPrompts
-            };
+                var userId = _userManager.GetUserId(User);
+                model.SavedPrompts = await _analysisService.GetUserPromptsAsync(userId);
+            }
             return View(model);
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Analyze(string prompt, string symbol, string exchange)
+        public async Task<IActionResult> Analyze(string prompt, string symbol, int? usedPromptId, string exchange)
         {
-            var savedPrompts = await _localStorageService.GetSavedPromptsAsync();
+            var userId = _userManager.GetUserId(User);
+            var savedPrompts = await _analysisService.GetUserPromptsAsync(userId);
             var model = new AnalysisViewModel
             {
                 Prompt = prompt,
                 Symbol = symbol,
                 Exchange = exchange,
-                SavedPrompts = savedPrompts
+                SavedPrompts = savedPrompts,
+                UsedPromptId = usedPromptId
             };
 
             if (string.IsNullOrWhiteSpace(prompt) || string.IsNullOrWhiteSpace(symbol))
@@ -62,6 +73,21 @@ namespace UIApplication.Controllers
                 var analysis = await _apiService.AnalyzeStockAsync(prompt, symbol.ToUpper(), exchange.ToUpper());   
                 model.Analysis = sanitizer.Sanitize(analysis);
                 model.IsLoading = false;
+
+                // 1. Save Analysis
+                // NOTE: We need to extract KeyIndicators from the analysis string, which is not possible here.
+                // For now, we will save the first 100 characters as a placeholder for KeyIndicators.
+                var keyIndicators = analysis.Length > 100 ? analysis.Substring(0, 100) + "..." : analysis;
+                await _analysisService.SaveStockAnalysisAsync(userId, symbol.ToUpper(), analysis, keyIndicators, usedPromptId);
+
+                // 2. Update User Stats
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    user.PromptsUsed++;
+                    user.StocksAnalyzed++;
+                    await _userManager.UpdateAsync(user);
+                }
             }
             catch (Exception ex)
             {
@@ -74,42 +100,39 @@ namespace UIApplication.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SavePrompt(string name, string prompt, string symbol, string exchange)
         {
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(prompt) || string.IsNullOrWhiteSpace(symbol))
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(prompt) || string.IsNullOrWhiteSpace(symbol) || string.IsNullOrWhiteSpace(exchange))
             {
-                return BadRequest("Name, prompt, and symbol are required");
+                return BadRequest("Titel, prompt, symbol og exchange skal udfyldes.");
             }
 
-            var savedPrompt = new SavedPrompt
-            {
-                Name = name,
-                Prompt = prompt,
-                Symbol = symbol,
-                Exchange = exchange,
-                CreatedDate = DateTime.Now
-            };
-
-            await _localStorageService.SavePromptAsync(savedPrompt);
+            var userId = _userManager.GetUserId(User);
+            await _analysisService.SaveUserPromptAsync(userId, name, symbol, exchange, prompt); //TODO AXEL
             return RedirectToAction("Index");
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePrompt(string id)
+        public async Task<IActionResult> DeletePrompt(int id)
         {
-            await _localStorageService.DeletePromptAsync(id);
+            var userId = _userManager.GetUserId(User);
+            await _analysisService.DeleteUserPromptAsync(userId, id);
             return RedirectToAction("Index");
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoadPrompt(string id)
+        [Authorize]
+        public async Task<IActionResult> LoadPrompt(int id)
         {
-            var savedPrompts = await _localStorageService.GetSavedPromptsAsync();
+            var userId = _userManager.GetUserId(User);
+            var savedPrompts = await _analysisService.GetUserPromptsAsync(userId);
             var prompt = savedPrompts.FirstOrDefault(p => p.Id == id);
 
-            if (prompt == null)
+            if (prompt == null || prompt.UserId != userId)
             {
                 return NotFound();
             }
@@ -119,7 +142,8 @@ namespace UIApplication.Controllers
                 Prompt = prompt.Prompt,
                 Symbol = prompt.Symbol,
                 Exchange = prompt.Exchange,
-                SavedPrompts = savedPrompts
+                SavedPrompts = savedPrompts,
+                UsedPromptId = id
             };
 
             return View("Index", model);

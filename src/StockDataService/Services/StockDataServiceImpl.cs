@@ -11,6 +11,7 @@ namespace StockDataService.Services
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _cache;
         private readonly IIndicatorCalculator _indicatorCalculator;
+        private readonly IHistoricalDataService _historicalDataService;
         private readonly ILogger<StockDataServiceImpl> _logger;
 
         public StockDataServiceImpl(
@@ -18,11 +19,13 @@ namespace StockDataService.Services
             IConfiguration configuration,
             IMemoryCache cache,
             IIndicatorCalculator indicatorCalculator,
+            IHistoricalDataService historicalDataService,
             ILogger<StockDataServiceImpl> logger)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
             _cache = cache;
+            _historicalDataService = historicalDataService;
             _indicatorCalculator = indicatorCalculator;
             _logger = logger;
         }
@@ -92,6 +95,9 @@ namespace StockDataService.Services
 
             // Sort by date descending and get current data
             historicalData = historicalData.OrderByDescending(d => d.Date).ToList();
+
+            // --- Save historical data to database ---
+            await _historicalDataService.SaveHistoricalDataAsync(symbol, historicalData);
             var currentData = historicalData.First();
 
             // Calculate indicators

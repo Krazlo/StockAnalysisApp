@@ -12,8 +12,8 @@ using StockDataService.Data;
 namespace StockDataService.Migrations
 {
     [DbContext(typeof(StockDataDbContext))]
-    [Migration("20251202104751_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251222065430_InitialSetup")]
+    partial class InitialSetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,36 +21,40 @@ namespace StockDataService.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.21")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("StockDataService.Models.StockData", b =>
                 {
                     b.Property<string>("Symbol")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Close")
-                        .HasColumnType("decimal(65,30)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("High")
-                        .HasColumnType("decimal(65,30)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("Low")
-                        .HasColumnType("decimal(65,30)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<decimal>("Open")
-                        .HasColumnType("decimal(65,30)");
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<long>("Volume")
                         .HasColumnType("bigint");
 
                     b.HasKey("Symbol", "Date");
 
-                    b.ToTable("StockData");
+                    b.ToTable("StockData", (string)null);
                 });
 #pragma warning restore 612, 618
         }

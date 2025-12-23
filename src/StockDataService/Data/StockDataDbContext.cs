@@ -15,8 +15,21 @@ namespace StockDataService.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<StockData>()
-                .HasKey(x => new { x.Symbol, x.Date });
+            modelBuilder.Entity<StockData>(entity =>
+            {
+                entity.ToTable("StockData");
+                entity.HasKey(x => new { x.Symbol, x.Date });
+
+                entity.Property(x => x.Open).HasPrecision(18, 6);
+                entity.Property(x => x.High).HasPrecision(18, 6);
+                entity.Property(x => x.Low).HasPrecision(18, 6);
+                entity.Property(x => x.Close).HasPrecision(18, 6);
+            });
+
+       
+
+
+
         }
 
         public DbSet<StockData> StockData { get; set; }

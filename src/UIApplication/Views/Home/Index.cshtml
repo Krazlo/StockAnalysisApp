@@ -22,6 +22,7 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Analyze" method="post" id="analyzeForm">
+                        <input type="hidden" name="usedPromptId" value="@Model.UsedPromptId" />
                         @Html.AntiForgeryToken()
                         <div class="mb-3 row align-items-end">
                             <div class="col-md-6">
@@ -95,18 +96,18 @@
 
                     {
                         <div class="list-group">
-                            @foreach (var savedPrompt in Model.SavedPrompts.OrderByDescending(p => p.CreatedDate))
+                            @foreach (var savedPrompt in Model.SavedPrompts.OrderByDescending(p => p.Id))
 
                             {
                                 <div class="list-group-item">
                                     <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">@savedPrompt.Name</h6>
-                                        <small>@savedPrompt.CreatedDate.ToString("dd/MM/yyyy")</small>
+                                        <h6 class="mb-1">@savedPrompt.Title</h6>
+                                        <small>@savedPrompt.Id</small>
                                     </div>
-                                    <p class="mb-1"><strong>Symbol:</strong> @savedPrompt.Symbol</p>
+                                    
                                     <p class="mb-2 text-muted small">@(savedPrompt.Prompt.Length > 50 ? savedPrompt.Prompt.Substring(0, 50) + "..." : savedPrompt.Prompt)</p>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="LoadPrompt" asp-route-id="@savedPrompt.Id" class="btn btn-outline-primary">
+                                        <a asp-action="LoadPrompt" asp-route-id="@savedPrompt.Id" class="btn btn-outline-primary @(Model.UsedPromptId == savedPrompt.Id ? "active" : "")">
                                             Indlæs
                                         </a>
                                         <form asp-action="DeletePrompt" method="post" class="d-inline">
@@ -139,25 +140,37 @@
         <div class="modal-content">
             <form asp-action="SavePrompt" method="post">
                 @Html.AntiForgeryToken()
+                <input type="hidden" name="symbol" value="@Model.Symbol" />
+                <input type="hidden" name="exchange" value="@Model.Exchange" />
+
                 <div class="modal-header">
                     <h5 class="modal-title" id="saveModalLabel">Gem prompt</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Luk"></button>
                 </div>
+
                 <div class="modal-body">
-                    <input type="hidden" name="prompt" value="@Model.Prompt" />
-                    <input type="hidden" name="symbol" value="@Model.Symbol" />
 
                     <div class="mb-3">
-                        <label for="name" class="form-label">Navn til denne gemte prompt</label>
-                        <input type="text" class="form-control" id="name" name="name"
-                               placeholder="f.eks. Apple trendanalyse" required>
+                        <label for="name" class="form-label">Titel til denne gemte prompt</label>
+                        <input type="text"
+                               class="form-control"
+                               id="name"
+                               name="name"
+                               placeholder="f.eks. Apple trendanalyse"
+                               required />
                     </div>
 
                     <div class="mb-3">
-                        <p><strong>Symbol:</strong> @Model.Symbol</p>
-                        <p><strong>Prompt:</strong> @Model.Prompt</p>
+                        <label for="prompt" class="form-label">Prompt indhold</label>
+                        <textarea class="form-control"
+                                  id="prompt"
+                                  name="prompt"
+                                  rows="5"
+                                  required>@Model.Prompt</textarea>
                     </div>
+
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
                     <button type="submit" class="btn btn-primary">Gem</button>
@@ -166,6 +179,7 @@
         </div>
     </div>
 </div>
+
 
 @section Styles {
     <style>

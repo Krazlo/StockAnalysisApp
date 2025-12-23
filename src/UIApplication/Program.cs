@@ -1,10 +1,23 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UIApplication.Data;
 using UIApplication.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// --- Identity and Database Configuration ---
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Configure DbContext for SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Add Identity services
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>() // Add role support
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// --- Existing Service Registrations ---
 builder.Services.AddControllersWithViews();
 
 // Add HttpClient
@@ -12,29 +25,54 @@ builder.Services.AddHttpClient();
 
 // Register services
 builder.Services.AddScoped<IApiService, ApiService>();
-builder.Services.AddSingleton<ILocalStorageService, LocalStorageService>();
+builder.Services.AddScoped<IAnalysisService, AnalysisService>();
+// builder.Services.AddSingleton<ILocalStorageService, LocalStorageService>(); // LocalStorageService is no longer needed for prompts
 
-// DB
-builder.Services.AddDbContext<UIApplicationDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 3))
-    ));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    // In a real-world scenario, we might add app.UseMigrationsEndPoint();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection(); // Added HttpsRedirection for best practice
 app.UseStaticFiles();
 
 app.UseRouting();
 
+// Add Authentication and Authorization middleware
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map Identity Razor Pages
+app.MapRazorPages();
+
+// Initialize the database and seed roles/admin user
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate(); // Apply pending migrations
+        await DbInitializer.Initialize(services); // Seed roles and admin user
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+    }
+}
 
 app.Run();

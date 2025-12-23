@@ -9,15 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlSanitizer" Version="9.0.889" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.21" />
-	<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.21" />
-	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
+	<PackageReference Include="HtmlSanitizer" Version="9.0.889" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

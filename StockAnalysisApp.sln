@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UIApplication", "src\UIAppl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSTests", "MSTests\MSTests.csproj", "{A943DEF4-9C12-494D-BB46-EF57BF91F90B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerService", "IdentityServerService\IdentityServerService.csproj", "{C3A4EE73-43D7-413F-81F6-FAB35C1E8FB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{BB7B4EA1-6F30-49F2-B253-E1B407353DC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,14 @@ Global
 		{744602CD-1313-4506-B7B7-FE7DC907E753}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{744602CD-1313-4506-B7B7-FE7DC907E753}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{744602CD-1313-4506-B7B7-FE7DC907E753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3A4EE73-43D7-413F-81F6-FAB35C1E8FB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3A4EE73-43D7-413F-81F6-FAB35C1E8FB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3A4EE73-43D7-413F-81F6-FAB35C1E8FB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3A4EE73-43D7-413F-81F6-FAB35C1E8FB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB7B4EA1-6F30-49F2-B253-E1B407353DC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB7B4EA1-6F30-49F2-B253-E1B407353DC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB7B4EA1-6F30-49F2-B253-E1B407353DC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB7B4EA1-6F30-49F2-B253-E1B407353DC5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A943DEF4-9C12-494D-BB46-EF57BF91F90B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A943DEF4-9C12-494D-BB46-EF57BF91F90B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A943DEF4-9C12-494D-BB46-EF57BF91F90B}.Release|Any CPU.ActiveCfg = Release|Any CPU

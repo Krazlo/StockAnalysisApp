@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using StockDataService.Data;
 using StockDataService.Services;
+using Microsoft.EntityFrameworkCore;
+using StockDataService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,13 +20,12 @@ builder.Services.AddMemoryCache();
 // Register services
 builder.Services.AddScoped<IStockDataService, StockDataServiceImpl>();
 builder.Services.AddScoped<IIndicatorCalculator, IndicatorCalculator>();
+builder.Services.AddScoped<IHistoricalDataService, HistoricalDataService>();
 
-// DB
+// --- DATABASE SETUP ---
 builder.Services.AddDbContext<StockDataDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 3))
-    ));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{ }
 
 
 // Add CORS
@@ -50,6 +51,21 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
+
+// Auto-migrate database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<StockDataDbContext>();
+
+    try
+    {
+        db.Database.Migrate();
+    }
+    catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1801)
+    {
+        // Database already exists ? ignore
+    }
+}
 
 app.MapControllers();
 

@@ -1,0 +1,66 @@
+@model List<UIApplication.Controllers.AnalysisOverviewViewModel>
+
+@{
+    ViewData["Title"] = "Mine analyser";
+}
+
+<h1 class="mb-4">Mine aktieanalyser</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Du har endnu ikke lavet nogen analyser.
+    </div>
+
+    <a asp-controller="Stock" asp-action="Index" class="btn btn-primary">
+        Lav din første analyse
+    </a>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Symbol</th>
+                <th>Dato</th>
+                <th>Vigtige indikatorer</th>
+                <th>Prompt</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model)
+            {
+                <tr>
+                    <td>@a.Symbol</td>
+
+                    <td>
+                        @a.AnalysisDate.ToShortDateString()
+                        @a.AnalysisDate.ToShortTimeString()
+                    </td>
+
+                    <td>
+                        @(string.IsNullOrEmpty(a.KeyIndicators)
+                            ? "Ingen indikatorer gemt"
+                            : (a.KeyIndicators.Length > 60
+                            ? a.KeyIndicators.Substring(0, 60) + "..."
+                            : a.KeyIndicators)
+                            )
+                    </td>
+
+                    <td>
+                        @a.UsedPromptTitle
+                    </td>
+
+                    <td class="text-end">
+                        <a asp-action="Details"
+                           asp-route-id="@a.Id"
+                           class="btn btn-sm btn-primary">
+                            Se detaljer
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

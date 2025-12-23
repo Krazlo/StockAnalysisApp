@@ -1,0 +1,46 @@
+@model UIApplication.Controllers.AnalysisDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Analyse detaljer - {Model.Symbol}";
+}
+
+<h1 class="mb-4">Analyse detaljer</h1>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <strong>@Model.Symbol</strong>
+        <span class="ms-2">
+            @Model.AnalysisDate.ToShortDateString()
+            @Model.AnalysisDate.ToShortTimeString()
+        </span>
+    </div>
+
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Symbol</dt>
+            <dd class="col-sm-9">@Model.Symbol</dd>
+
+            <dt class="col-sm-3">Prompt</dt>
+            <dd class="col-sm-9">@Model.UsedPromptTitle</dd>
+
+            <dt class="col-sm-3">Vigtige indikatorer</dt>
+            <dd class="col-sm-9">@Model.KeyIndicators</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">AI Analyse resultat</h5>
+    </div>
+
+    <div class="card-body">
+        <div style="white-space:pre-wrap; line-height:1.6;">
+            @Html.Raw(Model.AnalysisResult?.Replace("\n", "<br>"))
+        </div>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">
+    Tilbage til mine analyser
+</a>
