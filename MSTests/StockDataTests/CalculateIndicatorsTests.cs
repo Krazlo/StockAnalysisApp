@@ -1,4 +1,5 @@
-﻿using StockDataService.Models;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StockDataService.Models;
 using StockDataService.Services;
 using System.Text.Json;
 
@@ -85,12 +86,30 @@ namespace MSTests.StockDataTests
         [TestMethod]
         public void CalculateIndicators_RSITrend_Bullish_WhenPricesRising()
         {
-            var history = GenerateHistoricalData(30, dailyChange: 2);
+            List<decimal>? priceList = new List<decimal>
+            {
+                100, 102, 101, 103, 102, 104, 103, 105, 104, 106, 
+                105, 107, 106, 108, 107, 106, 108, 109, 110, 109,
+                108, 109, 110, 111, 113, 115, 117, 118, 117, 120
+            };
+            var history = GenerateHistoricalData(priceList.Count, prices: priceList);
             var current = history.Last();
 
             var result = _calculator.CalculateIndicators(history, current);
 
             Assert.AreEqual("Bullish", result.RSITrend);
+        }
+
+        [TestMethod]
+        public void CalculateIndicators_RSI_Equals100_WhenNoLosses()
+        {
+            var history = GenerateHistoricalData(30, dailyChange: 2);
+            var current = history.Last();
+
+            var result = _calculator.CalculateIndicators(history, current);
+
+            Assert.AreEqual("Overbought", result.RSITrend);
+            Assert.AreEqual(100, result.RSI_14);
         }
 
         #endregion
@@ -112,7 +131,16 @@ namespace MSTests.StockDataTests
         [TestMethod]
         public void CalculateIndicators_MACDState_Bullish_ForUptrend()
         {
-            var history = GenerateHistoricalData(60, dailyChange: 1.5m);
+            List<decimal>? priceList = new List<decimal>
+            {
+                100, 102, 101, 103, 102, 104, 103, 105, 104, 106,
+                105, 107, 106, 108, 107, 106, 108, 109, 110, 109,
+                108, 109, 110, 111, 113, 115, 117, 118, 117, 120,
+                119, 121, 123, 124, 126, 125, 128, 129, 130, 129,
+                129, 131, 133, 134, 136, 135, 138, 139, 140, 139,
+                139, 141, 143, 144, 146, 145, 148, 149, 150, 149,
+            };
+            var history = GenerateHistoricalData(priceList.Count, prices: priceList);
             var current = history.Last();
 
             var result = _calculator.CalculateIndicators(history, current);
@@ -159,25 +187,46 @@ namespace MSTests.StockDataTests
             int days,
             decimal startPrice = 100,
             decimal dailyChange = 1,
-            long volume = 1_000_000)
+            long volume = 1_000_000,
+            List<decimal>? prices = null)
         {
             var data = new List<StockData>();
-            var price = startPrice;
 
-            for (int i = 0; i < days; i++)
+            if (prices == null)
             {
-                data.Add(new StockData
-                {
-                    Date = DateTime.Today.AddDays(-days + i),
-                    Open = price,
-                    High = price + 1,
-                    Low = price - 1,
-                    Close = price,
-                    Volume = volume
-                });
+                var price = startPrice;
 
-                price += dailyChange;
+                for (int i = 0; i < days; i++)
+                {
+                    data.Add(new StockData
+                    {
+                        Date = DateTime.Today.AddDays(-days + i),
+                        Open = price,
+                        High = price + 1,
+                        Low = price - 1,
+                        Close = price,
+                        Volume = volume
+                    });
+
+                    price += dailyChange;
+                }
             }
+            else
+            {
+                for (int i = 0; i < days; i++)
+                {
+                    data.Add(new StockData
+                    {
+                        Date = DateTime.Today.AddDays(-days + i),
+                        Open = prices[i],
+                        High = prices[i] + 1,
+                        Low = prices[i] - 1,
+                        Close = prices[i],
+                        Volume = volume
+                    });
+                }
+            }
+
 
             return data;
         }
@@ -191,7 +240,7 @@ namespace MSTests.StockDataTests
 
             var filePath = Path.Combine(
                 AppContext.BaseDirectory,
-                "StockData",
+                "StockDataTests",
                 "json",
                 "eodhd-nkt-sample-response.json"
             );
