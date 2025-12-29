@@ -143,7 +143,6 @@ namespace StockDataService.Services
             _logger.LogInformation($"PriceVsSMA200 = {indicators.PriceVsSMA200}");
             _logger.LogInformation($"OBV = {indicators.OBV}");
             _logger.LogInformation($"OBVTrend = {indicators.OBVTrend}");
-            //TODO: DCF & VBO (Volume On Balance)
 
             _logger.LogInformation("Successfully fetched and cached stock data for symbol: {Symbol}", symbol);
 

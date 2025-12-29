@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="StockData\json\eodhd-nkt-sample-response.json">
+    <Content Include="StockDataTests\json\eodhd-nkt-sample-response.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -53,4 +53,3 @@ services:
 
 volumes:
   mssql_data:
-  mysql_data: # Keep this volume definition for now, in case it's used elsewhere, but it will be removed later if not needed.
