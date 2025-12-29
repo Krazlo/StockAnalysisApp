@@ -8,9 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 // --- Identity and Database Configuration ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// Configure DbContext for SQL Server
+// Configure DbContext for SQL Server - retry pga. SeedData
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sql =>
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null
+        )
+    ));
 
 // Add Identity services
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -29,6 +35,8 @@ builder.Services.AddScoped<IAnalysisService, AnalysisService>();
 // builder.Services.AddSingleton<ILocalStorageService, LocalStorageService>(); // LocalStorageService is no longer needed for prompts
 
 var app = builder.Build();
+
+await SeedData.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
