@@ -52,21 +52,28 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-// Auto-migrate database on startup
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<StockDataDbContext>();
+if (!app.Environment.IsEnvironment("Test"))
+    // Auto-migrate database on startup
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<StockDataDbContext>();
 
-    try
-    {
-        db.Database.Migrate();
+        if (db.Database.IsRelational())
+        {
+            try
+            {
+                db.Database.Migrate();
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1801)
+            {
+                // Database already exists ? ignore
+            }
+        }
+
     }
-    catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1801)
-    {
-        // Database already exists ? ignore
-    }
-}
 
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

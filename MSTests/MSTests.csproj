@@ -17,13 +17,20 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageReference Include="PactNet" Version="5.0.1" />
+    <PackageReference Include="Testcontainers" Version="4.9.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\src\AIAnalysisService\AIAnalysisService.csproj" />
+    <ProjectReference Include="..\src\ApiGateway\ApiGateway.csproj" />
     <ProjectReference Include="..\src\StockDataService\StockDataService.csproj" />
+    <ProjectReference Include="..\src\UIApplication\UIApplication.csproj" />
   </ItemGroup>
 
   <ItemGroup>
