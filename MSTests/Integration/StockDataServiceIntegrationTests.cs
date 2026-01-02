@@ -1,11 +1,7 @@
-﻿using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using AIAnalysisService.Models;
+using DotNet.Testcontainers.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using System.ComponentModel;
-using System.Net;
-using PactNet;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -15,8 +11,8 @@ namespace MSTests.StockDataServiceIntegrationTests
     public class StockDataServiceIntegrationTests
     {
         private static DotNet.Testcontainers.Containers.IContainer _wireMockContainer;
-        private static StockDataServiceFactory _factory;
-        private static PactConfig _config;
+        private static StockDataServiceFactory _stockFactory;
+        private static AIAnalysisServiceFactory _analysisFactory;
 
         [ClassInitialize]
         public static async Task Setup(TestContext context)
@@ -35,22 +31,17 @@ namespace MSTests.StockDataServiceIntegrationTests
                 ["Eodhd:BaseUrl"] = wireMockUrl,
             };
 
-            _factory = new StockDataServiceFactory();
-
-            _config = new PactConfig
-            {
-                PactDir = "/pacts",
-                DefaultJsonSettings = new System.Text.Json.JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-                }
-            };
+            _stockFactory = new StockDataServiceFactory();
+            _analysisFactory = new AIAnalysisServiceFactory();
         }
+
+        #region Controller Tests
+        //Test af controllers, DI, serialization. 
 
         [TestMethod]
         public async Task GetStockIndicators_ReturnsCalculatedIndicators()
         {
-            var client = _factory.CreateClient();
+            var client = _stockFactory.CreateClient();
 
             var response = await client.GetAsync(
               "/api/stock/AAPL?exchange=US"
@@ -59,9 +50,7 @@ namespace MSTests.StockDataServiceIntegrationTests
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-
             using var doc = JsonDocument.Parse(json);
-
             var indicators = doc.RootElement.GetProperty("indicators");
 
             Assert.IsTrue(indicators.TryGetProperty("rsI_14", out _));
@@ -69,44 +58,52 @@ namespace MSTests.StockDataServiceIntegrationTests
         }
 
         [TestMethod]
-        public async Task StockDataService_Contract_With_AIAnalysisService()
+        public async Task AnalyzeStocks_ReturnsAnalysis()
         {
-            IPactBuilderV4 pact = Pact.V4("StockDataService", "AIAnalysisService", _config).WithHttpInteractions();
+            var client = _analysisFactory.CreateClient();
 
-            pact
-              .UponReceiving("Valid analysis request")
-              .WithRequest(HttpMethod.Post, "/analyze")
-              .WithJsonBody(new
-              {
-                  symbol = "AAPL",
-                  indicators = new { RSI_14 = 55 }
-              })
-              .WillRespond()
-              .WithStatus(HttpStatusCode.OK)
-              .WithJsonBody(new
-              {
-                  summary = "Bullish outlook"
-              });
-
-            await pact.VerifyAsync(async ctx =>
+            var request = new AnalysisRequest
             {
-                var client = new HttpClient { BaseAddress = ctx.MockServerUri };
-
-                var response = await client.PostAsJsonAsync("/analyze", new
+                Prompt = "Analyze this stock",
+                Symbol = "AAPL",
+                StockData = new StockDataInfo
                 {
-                    symbol = "AAPL",
-                    indicators = new { RSI_14 = 55 }
-                });
+                    Symbol = "AAPL",
+                    CurrentPrice = 150,
+                    Date = DateTime.Now,
+                    Indicators = TestHelpers.GenerateDummyIndicators()
+                }
+            };
 
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            });
+            var response = await client.PostAsJsonAsync(
+                "/api/analysis/analyze",
+                request
+            );
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            Assert.IsTrue(doc.RootElement.TryGetProperty("success", out var success));
+            Assert.IsTrue(success.GetBoolean());
+
+            Assert.IsTrue(doc.RootElement.TryGetProperty("analysis", out var analysis));
+            Assert.AreEqual("Mega god analyse", analysis.GetString());
+
+            Assert.AreEqual("AAPL", doc.RootElement.GetProperty("symbol").GetString());
         }
+        #endregion
 
+        #region Cleanup
         [ClassCleanup]
         public static async Task Cleanup()
         {
             await _wireMockContainer.DisposeAsync();
-            _factory.Dispose();
+            _stockFactory.Dispose();
+            _analysisFactory.Dispose();
         }
+        #endregion
+
     }
 }

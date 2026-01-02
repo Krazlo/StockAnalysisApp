@@ -41,3 +41,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+namespace AIAnalysisService
+{
+    public partial class Program { }
+}

@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using AIAnalysisService.Models;
 
@@ -117,17 +117,17 @@ namespace AIAnalysisService.Services
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"User Prompt: {request.Prompt}");
+            sb.AppendLine($"{request.Prompt}");
             sb.AppendLine();
-            sb.AppendLine($"Stock Analysis Request for: {request.Symbol}");
+            sb.AppendLine($"Til teknisk analyse for: {request.Symbol}, anvend de nedenstående tekniske indikatorer.");
             sb.AppendLine();
 
             if (request.StockData != null)
             {
-                sb.AppendLine("Current Stock Data:");
+                sb.AppendLine("Nuværende Stock Data:");
                 sb.AppendLine($"- Symbol: {request.StockData.Symbol}");
-                sb.AppendLine($"- Current Price: ${request.StockData.CurrentPrice:F2}");
-                sb.AppendLine($"- Date: {request.StockData.Date:yyyy-MM-dd}");
+                sb.AppendLine($"- Nuværende Price: ${request.StockData.CurrentPrice:F2}");
+                sb.AppendLine($"- Dato: {request.StockData.Date:yyyy-MM-dd}");
                 sb.AppendLine();
 
                 var indicators = request.StockData.Indicators;
@@ -174,7 +174,7 @@ namespace AIAnalysisService.Services
                 sb.AppendLine($"- OBV Trend: {indicators.OBVTrend:F2}");
                 sb.AppendLine();
 
-                _logger.LogInformation($"DEBUG: Indicators: ", indicators);
+                _logger.LogInformation($"DEBUG: Indicators");
                 _logger.LogInformation($"SMA_20 = {indicators.SMA_20}");
                 _logger.LogInformation($"SMA_200 = {indicators.SMA_50}");
                 _logger.LogInformation($"SMA_50 = {indicators.SMA_200}");
@@ -197,8 +197,6 @@ namespace AIAnalysisService.Services
                 _logger.LogInformation($"PriceVsSMA50 = {indicators.PriceVsSMA50}");
                 _logger.LogInformation($"PriceVsSMA200 = {indicators.PriceVsSMA200}");
             }
-
-            sb.AppendLine("Please provide a comprehensive stock analysis based on the above data and the user's prompt.");
 
             return sb.ToString();
         }

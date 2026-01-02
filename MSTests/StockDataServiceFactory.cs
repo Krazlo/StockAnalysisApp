@@ -6,7 +6,7 @@ using StockDataService.Data;
 using StockDataService.Services;
 
 public class StockDataServiceFactory
-    : WebApplicationFactory<Program>
+    : WebApplicationFactory<StockDataService.Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

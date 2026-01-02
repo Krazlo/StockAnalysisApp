@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using AIAnalysisService.Models;
 using AIAnalysisService.Services;
+using System.Text.Json;
 
 namespace AIAnalysisService.Controllers
 {
@@ -51,7 +52,7 @@ namespace AIAnalysisService.Controllers
                 _logger.LogError(ex, "Error analyzing stock for symbol: {Symbol}", request.Symbol);
                 return StatusCode(500, new { error = "An error occurred while analyzing the stock" });
             }
-        }
+        } 
 
         [HttpGet("health")]
         public IActionResult Health()
