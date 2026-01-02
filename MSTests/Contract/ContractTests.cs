@@ -11,11 +11,15 @@ namespace MSTests.Contract
         private static PactConfig _config;
 
         [ClassInitialize]
-        public static async Task Setup(TestContext context)
+        public static void Setup(TestContext context)
         {
+            var pactDir = Path.Combine(context.TestRunDirectory, "pacts");
+
+            Directory.CreateDirectory(pactDir);
+
             _config = new PactConfig
             {
-                PactDir = "/pacts",
+                PactDir = pactDir,
                 DefaultJsonSettings = new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
