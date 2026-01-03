@@ -4,7 +4,7 @@ A C# microservice application that provides intelligent stock analysis using rea
 
 ## Features
 
-- **Real-time Stock Data**: Fetches live stock data from Alpha Vantage API
+- **Real-time Stock Data**: Fetches live stock data from EODHD API
 - **Technical Indicators**: Automatically calculates 15+ technical indicators including:
   - Simple Moving Averages (SMA 20, 50, 200)
   - Exponential Moving Averages (EMA 12, 26)
@@ -35,7 +35,7 @@ User → UI (5003) → API Gateway (5000) → Stock Service (5001) → Alpha Van
 ## Prerequisites
 
 - .NET 8.0 SDK
-- Alpha Vantage API Key (free at https://www.alphavantage.co/support/#api-key)
+- EODHD API Key
 - Gemini API Key (free at https://ai.google.dev/)
 
 ## Installation
@@ -46,30 +46,10 @@ User → UI (5003) → API Gateway (5000) → Stock Service (5001) → Alpha Van
 cd /path/to/StockAnalysisApp
 ```
 
-### 2. Configure API Keys
+### 2. Configure API Keys (in your .env file locally or using Github Secrets)
 
-#### Stock Data Service
-Edit `src/StockDataService/appsettings.json`:
-```json
-{
-  "AlphaVantage": {
-    "ApiKey": "YOUR_ALPHA_VANTAGE_API_KEY_HERE",
-    "BaseUrl": "https://www.alphavantage.co/query"
-  }
-}
-```
-
-#### AI Analysis Service
-Edit `src/AIAnalysisService/appsettings.json`:
-```json
-{
-  "Gemini": {
-    "ApiKey": "YOUR_GEMINI_API_KEY_HERE",
-    "BaseUrl": "https://generativelanguage.googleapis.com/v1beta/models",
-    "Model": "gemini-2.5-flash"
-  }
-}
-```
+EODHD_API_KEY="YOUR_EODHD_KEY"
+GEMINI_API_KEY="YOUR_GEMINI_KEY"
 
 ### 3. Build the Solution
 
@@ -79,36 +59,11 @@ dotnet build
 
 ## Running the Application
 
-You need to run all four services simultaneously. Open **four separate terminal windows**:
-
-### Terminal 1: API Gateway
-```bash
-cd src/ApiGateway
-dotnet run
-```
-The gateway will start on http://localhost:5000
-
-### Terminal 2: Stock Data Service
-```bash
-cd src/StockDataService
-dotnet run
-```
-The service will start on http://localhost:5001
-
-### Terminal 3: AI Analysis Service
-```bash
-cd src/AIAnalysisService
-dotnet run
-```
-The service will start on http://localhost:5002
-
-### Terminal 4: UI Application
-```bash
-cd src/UIApplication
-dotnet run
-```
-The UI will start on http://localhost:5003
-
+1. Open Docker Dekstop
+2. In your IDE with the solution opened run:
+   ````
+   docker-compose up -d --build
+   ```` 
 ### 4. Access the Application
 
 Open your web browser and navigate to:
@@ -121,9 +76,10 @@ http://localhost:5003
 ### Analyzing a Stock
 
 1. Enter a stock symbol (e.g., AAPL, MSFT, GOOGL, TSLA)
-2. Write your analysis prompt (e.g., "Analyze the current trend and provide buy/sell recommendations")
-3. Click "Analyze Stock"
-4. Wait for the AI to process the data and provide analysis
+2. Enter an exchange (e.g., CO, US)
+3. Write your analysis prompt (e.g., "Analyze the current trend and provide buy/sell recommendations")
+4. Click "Analyze Stock"
+5. Wait for the AI to process the data and provide analysis
 
 ### Saving Prompts
 
@@ -215,9 +171,7 @@ StockAnalysisApp/
 
 ### Stock Data Service
 
-**Data Source**: Alpha Vantage API
-- Fetches daily time series data
-- Supports 20+ years of historical data
+**Data Source**: EODHD API
 - Implements caching (5-minute default) to reduce API calls
 
 **Technical Indicators Calculated**:
@@ -240,20 +194,11 @@ StockAnalysisApp/
 3. Sends to Gemini API
 4. Returns AI-generated analysis
 
-### Local Storage
-
-**Location**: User's AppData folder
-- Windows: `%APPDATA%\StockAnalysisApp\saved_prompts.json`
-- macOS: `~/Library/Application Support/StockAnalysisApp/saved_prompts.json`
-- Linux: `~/.config/StockAnalysisApp/saved_prompts.json`
-
-**Format**: JSON file with array of saved prompts
 
 ## API Rate Limits
 
-### Alpha Vantage (Free Tier)
-- 5 API calls per minute
-- 500 API calls per day
+### EODHD (Free Tier)
+- 20 API calls per day
 - Caching implemented to minimize calls
 
 ### Gemini API (Free Tier)
@@ -283,38 +228,12 @@ StockAnalysisApp/
 - Ensure all dependencies are installed
 - Check .NET SDK version compatibility
 
-## Example Prompts
-
-Here are some example prompts you can use:
-
-1. **Trend Analysis**: "Analyze the current trend and provide buy/sell recommendations based on technical indicators"
-
-2. **Risk Assessment**: "Evaluate the risk level of this stock based on volatility indicators and price movements"
-
-3. **Entry/Exit Points**: "Suggest optimal entry and exit points based on support and resistance levels"
-
-4. **Momentum Analysis**: "Analyze the momentum indicators and predict short-term price movement"
-
-5. **Comparative Analysis**: "Compare the current technical indicators to historical averages and identify anomalies"
-
-## Future Enhancements
-
-Potential features for future versions:
-- Multiple stock comparison
-- Historical analysis tracking
-- Email alerts for specific conditions
-- Portfolio management
-- Real-time streaming data
-- Mobile application
-- Advanced charting
-- Backtesting capabilities
-
 ## Technologies Used
 
 - **Backend**: ASP.NET Core 8.0, C#
 - **API Gateway**: Ocelot 24.0
 - **Frontend**: ASP.NET Core MVC, Bootstrap 5
-- **APIs**: Alpha Vantage, Google Gemini AI
+- **APIs**: EODHD, Google Gemini AI
 - **Serialization**: System.Text.Json
 - **Caching**: IMemoryCache
 
@@ -327,13 +246,11 @@ This project is provided as-is for educational and personal use.
 For issues or questions:
 1. Check the Troubleshooting section
 2. Review API documentation:
-   - Alpha Vantage: https://www.alphavantage.co/documentation/
+   - EODHD: https://eodhd.com/financial-apis/
    - Gemini API: https://ai.google.dev/gemini-api/docs
 
 ## Acknowledgments
 
-- Alpha Vantage for providing free stock market data
+- EODHD for providing free stock market data
 - Google for the Gemini AI API
 - Microsoft for the .NET platform and Ocelot gateway
-
-test til CI/CD

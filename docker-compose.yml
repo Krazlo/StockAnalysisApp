@@ -36,7 +36,7 @@ services:
       - "5003:8080"
     depends_on:
       - apigateway
-      - mssql # New dependency on MSSQL
+      - mssql
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
   
@@ -45,7 +45,7 @@ services:
     container_name: mssql
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: "YourStrong(!)Password" # Strong password for MSSQL
+      SA_PASSWORD: "YourStrong(!)Password"
     ports:
       - "1433:1433"
     volumes:
