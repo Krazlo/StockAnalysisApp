@@ -31,6 +31,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Analysis" asp-action="Index">Mine Analyser</a>
                         </li>
+                        <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Analysis"
+                                   asp-action="Image">
+                                   Billedanalyse
+                                </a>
+                        </li>
 }
 @if (User.IsInRole("Admin"))
 {

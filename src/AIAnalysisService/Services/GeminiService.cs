@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using AIAnalysisService.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AIAnalysisService.Services
 {
@@ -9,15 +10,18 @@ namespace AIAnalysisService.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
         private readonly ILogger<GeminiService> _logger;
+        private readonly HttpClient _client;
 
         public GeminiService(
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration,
-            ILogger<GeminiService> logger)
+            ILogger<GeminiService> logger,
+            HttpClient client)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
             _logger = logger;
+            _client = client;
         }
 
         public async Task<AnalysisResponse> AnalyzeStockAsync(AnalysisRequest request)
@@ -111,6 +115,85 @@ namespace AIAnalysisService.Services
                     Timestamp = DateTime.UtcNow
                 };
             }
+        }
+
+        public async Task<string> AnalyzeImage(string prompt, List<ImageInput> images)
+        {
+            if (images == null || images.Count == 0)
+                throw new ArgumentException("At least one image is required");
+
+            if (images.Count > 5)
+                throw new ArgumentException("Maximum 5 images are supported");
+
+            var apiKey = _configuration["Gemini:ApiKey"];
+            var baseUrl = _configuration["Gemini:BaseUrl"];
+            var model = _configuration["Gemini:Model"];
+            var url = $"{baseUrl}/{model}:generateContent?key={apiKey}";
+
+            var parts = new List<object>();
+
+            // Start med hovedprompt
+            parts.Add(new
+            {
+                text = prompt
+            });
+
+            // Tilf�j hvert billede som separat part
+            foreach (var image in images)
+            {
+                if (!string.IsNullOrWhiteSpace(image.Description))
+                {
+                    parts.Add(new
+                    {
+                        text = $"Image context: {image.Description}"
+                    });
+                }
+
+                parts.Add(new
+                {
+                    inline_data = new
+                    {
+                        mime_type = image.MimeType,
+                        data = image.Base64
+                    }
+                });
+            }
+
+
+            var payload = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        parts = parts
+                    }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var res = await _client.PostAsync(url,
+                new StringContent(json, Encoding.UTF8, "application/json"));
+
+            var body = await res.Content.ReadAsStringAsync();
+            if (!res.IsSuccessStatusCode)
+            {
+                _logger.LogError("Gemini image analysis failed: {Status} - {Body}", res.StatusCode, body);
+                return $"Gemini failed: {res.StatusCode} - {body}";
+            }
+
+
+            var response = JsonDocument.Parse(body);
+
+            var text = response
+              .RootElement
+              .GetProperty("candidates")[0]
+              .GetProperty("content")
+              .GetProperty("parts")[0]
+              .GetProperty("text")
+              .GetString();
+
+            return text ?? "No analysis returned";
         }
 
         private string BuildPromptWithStockData(AnalysisRequest request)

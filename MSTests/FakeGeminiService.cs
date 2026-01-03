@@ -15,4 +15,9 @@ public class FakeGeminiService : IGeminiService
 
         return Task.FromResult(result);
     }
+
+    public Task<string> AnalyzeImage(string prompt, List<ImageInput> images)
+    {
+        throw new NotImplementedException();
+    }
 }

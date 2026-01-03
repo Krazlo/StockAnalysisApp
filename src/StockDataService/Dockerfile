@@ -9,12 +9,12 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy csproj
-COPY ["StockDataService.csproj", "./"]
-RUN dotnet restore "./StockDataService.csproj"
+COPY ["src/StockDataService/StockDataService.csproj", "StockDataService/"]
+RUN dotnet restore "StockDataService/StockDataService.csproj"
 
-# Copy the rest of the source code
-COPY . .
+COPY ["src/StockDataService/", "StockDataService/"]
 
+WORKDIR /src/StockDataService
 RUN dotnet build "./StockDataService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publish image

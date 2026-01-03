@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using UIApplication.Data;
 using UIApplication.Models;
 using UIApplication.Services;
@@ -19,18 +18,21 @@ namespace UIApplication.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<HomeController> _logger;
         private HtmlSanitizer sanitizer;
+        private readonly IFileStorageService _fileStorage;
 
         public HomeController(
             IApiService apiService,
             IAnalysisService analysisService,
             UserManager<ApplicationUser> userManager,
-            ILogger<HomeController> logger)
+            ILogger<HomeController> logger,
+            IFileStorageService fileStorage)
         {
             _apiService = apiService;
             _analysisService = analysisService;
             _userManager = userManager;
             _logger = logger;
             sanitizer = new HtmlSanitizer();
+            _fileStorage = fileStorage;
         }
 
         public async Task<IActionResult> Index()

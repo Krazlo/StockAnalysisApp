@@ -23,7 +23,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>() // Add role support
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// --- Existing Service Registrations ---
+
+
+// Existing Service Registrations 
 builder.Services.AddControllersWithViews();
 
 // Add HttpClient
@@ -32,6 +34,10 @@ builder.Services.AddHttpClient();
 // Register services
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IAnalysisService, AnalysisService>();
+builder.Services.Configure<MinioOptions>(
+    builder.Configuration.GetSection("Minio"));
+builder.Services.AddSingleton<IFileStorageService, MinioFileStorageService>();
+
 // builder.Services.AddSingleton<ILocalStorageService, LocalStorageService>(); // LocalStorageService is no longer needed for prompts
 
 var app = builder.Build();
