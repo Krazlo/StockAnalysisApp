@@ -1,0 +1,67 @@
+﻿@model UIApplication.Models.ImageAnalysisViewModel
+@{
+    ViewData["Title"] = "Billedbaseret Aktieanalyse";
+}
+
+<h2>Billedbaseret AI Aktieanalyse</h2>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        Upload chart + skriv din prompt
+    </div>
+
+    <div class="card-body">
+        <form asp-action="AnalyzeImage" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label class="form-label">Prompt</label>
+                <textarea class="form-control"
+                          name="Prompt"
+                          rows="6"
+                          placeholder="Forklar hvad AI skal analysere…"
+                          required>@Model.Prompt</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Upload Charts (op til 5)</label>
+                <input type="file"
+                       class="form-control"
+                       name="images"
+                       accept="image/png,image/jpeg"
+                       multiple
+                       required />
+                <small class="text-muted">
+                    Upload op til 5 charts (f.eks. forskellige timeframes eller indikatorer).
+                </small>
+            </div>
+
+            <button class="btn btn-success" type="submit">Analyser</button>
+        </form>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3">@Model.ErrorMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.AnalysisResult))
+        {
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    AI Analyse Resultat
+                </div>
+                <div class="card-body">
+                    <pre>@Model.AnalysisResult</pre>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    document.querySelector('input[name="images"]').addEventListener('change', function () {
+        if (this.files.length > 5) {
+            alert("Du kan maks uploade 5 billeder.");
+            this.value = "";
+        }
+    });
+</script>

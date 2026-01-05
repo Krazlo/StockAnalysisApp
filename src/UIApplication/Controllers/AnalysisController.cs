@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UIApplication.Data;
+using UIApplication.DTO;
 using UIApplication.Models;
 using UIApplication.Services;
 
@@ -12,13 +13,19 @@ namespace UIApplication.Controllers
     {
         private readonly IAnalysisService _analysisService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IFileStorageService _fileStorage;
+        private readonly IApiService _apiService;
 
         public AnalysisController(
             IAnalysisService analysisService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IFileStorageService fileStorage,
+            IApiService apiService)
         {
             _analysisService = analysisService;
             _userManager = userManager;
+            _fileStorage = fileStorage;
+            _apiService = apiService;
         }
 
         // ---------------- INDEX (Main Analysis Page) ----------------
@@ -38,6 +45,66 @@ namespace UIApplication.Controllers
 
             return View(viewModel);
         }
+
+        // ------------ IMAGE ------------
+        [HttpGet]
+        [Authorize]
+        public IActionResult Image()
+        {
+            return View(new ImageAnalysisViewModel());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AnalyzeImage(ImageAnalysisViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Prompt) ||
+                model.Images == null ||
+                model.Images.Count == 0)
+            {
+                model.ErrorMessage = "Prompt og mindst ét billede er påkrævet.";
+                return View("Image", model);
+            }
+
+            if (model.Images.Count > 5)
+            {
+                model.ErrorMessage = "Du kan maks uploade 5 billeder.";
+                return View("Image", model);
+            }
+
+            try
+            {
+                var imageInputs = new List<ImageInputDto>();
+
+                foreach (var image in model.Images)
+                {
+                    using var ms = new MemoryStream();
+                    await image.CopyToAsync(ms);
+
+                    imageInputs.Add(new ImageInputDto
+                    {
+                        Base64 = Convert.ToBase64String(ms.ToArray()),
+                        MimeType = image.ContentType,
+                        Description = image.FileName
+                    });
+                }
+
+                var analysis = await _apiService.AnalyzeStockImagesAsync(
+                    model.Prompt,
+                    imageInputs
+                );
+
+                model.AnalysisResult = analysis;
+            }
+            catch (Exception ex)
+            {
+                model.ErrorMessage = ex.Message;
+            }
+
+            return View("Image", model);
+        }
+
 
         // ---------------- OVERVIEW (List of previous analyses) ----------------
         public async Task<IActionResult> Overview()

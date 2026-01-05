@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
 using System.Text.Json;
+using UIApplication.DTO;
 
 namespace UIApplication.Services
 {
@@ -87,5 +88,96 @@ namespace UIApplication.Services
                 return $"Error: {ex.Message}";
             }
         }
+
+        // single image
+        public async Task<string> AnalyzeStockImageAsync(string prompt, string base64Image)
+        {
+            try
+            {
+                var gatewayUrl = _configuration["ApiGateway:BaseUrl"];
+                var client = _httpClientFactory.CreateClient();
+
+                var payload = new
+                {
+                    prompt = prompt,
+                    image = new
+                    {
+                        mimeType = "image/png",
+                        data = base64Image
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var url = $"{gatewayUrl}/analysis/image-analyze";
+
+                var response = await client.PostAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Vision analysis failed: {StatusCode} - {Error}",
+                        response.StatusCode, error);
+
+                    return $"Error from analysis service: {response.StatusCode}";
+                }
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                var doc = JsonSerializer.Deserialize<JsonElement>(responseJson);
+
+                return doc.GetProperty("analysis").GetString()
+                    ?? "No analysis returned.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Vision analyze failed");
+                return $"Error: {ex.Message}";
+            }
+        }
+        // multi image
+        public async Task<string> AnalyzeStockImagesAsync(string prompt, List<ImageInputDto> images)
+        {
+            var gatewayUrl = _configuration["ApiGateway:BaseUrl"];
+            var client = _httpClientFactory.CreateClient();
+
+            var payload = new
+            {
+                prompt = prompt,
+                images = images.Select(i => new
+                {
+                    base64 = i.Base64,
+                    mimeType = i.MimeType,
+                    description = i.Description
+                })
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var url = $"{gatewayUrl}/analysis/image-analyze";
+
+            var response = await client.PostAsync(url, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Multi-image analysis failed: {Status} - {Error}",
+                    response.StatusCode, error);
+
+                return $"Error from analysis service: {response.StatusCode}";
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(responseJson);
+
+            return doc
+                .RootElement
+                .GetProperty("analysis")
+                .GetString()
+                ?? "No analysis returned.";
+        }
+
+
     }
 }
