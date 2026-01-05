@@ -32,7 +32,6 @@ builder.Services.AddHttpClient();
 // Register services
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IAnalysisService, AnalysisService>();
-// builder.Services.AddSingleton<ILocalStorageService, LocalStorageService>(); // LocalStorageService is no longer needed for prompts
 
 var app = builder.Build();
 
@@ -50,7 +49,7 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection(); // Added HttpsRedirection for best practice
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

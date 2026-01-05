@@ -10,27 +10,12 @@ namespace MSTests.StockDataServiceIntegrationTests
     [TestClass]
     public class StockDataServiceIntegrationTests
     {
-        private static DotNet.Testcontainers.Containers.IContainer _wireMockContainer;
         private static StockDataServiceFactory _stockFactory;
         private static AIAnalysisServiceFactory _analysisFactory;
 
         [ClassInitialize]
         public static async Task Setup(TestContext context)
         {
-            _wireMockContainer = new ContainerBuilder()
-                .WithImage("wiremock/wiremock:latest")
-                .WithPortBinding(8080, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8080))
-                .Build();
-
-            await _wireMockContainer.StartAsync();
-
-            var wireMockUrl = $"http://localhost:{_wireMockContainer.GetMappedPublicPort(8080)}";
-            var inMemoryConfig = new Dictionary<string, string?>
-            {
-                ["Eodhd:BaseUrl"] = wireMockUrl,
-            };
-
             _stockFactory = new StockDataServiceFactory();
             _analysisFactory = new AIAnalysisServiceFactory();
         }
@@ -99,7 +84,6 @@ namespace MSTests.StockDataServiceIntegrationTests
         [ClassCleanup]
         public static async Task Cleanup()
         {
-            await _wireMockContainer.DisposeAsync();
             _stockFactory.Dispose();
             _analysisFactory.Dispose();
         }
