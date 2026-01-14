@@ -89,8 +89,8 @@ namespace MSTests.UnitTests
             List<decimal>? priceList = new List<decimal>
             {
                 100, 102, 101, 103, 102, 104, 103, 105, 104, 106, 
-                105, 107, 106, 108, 107, 106, 108, 109, 110, 109,
-                108, 109, 110, 111, 113, 115, 117, 118, 117, 120
+                105, 106, 105, 105, 104, 106, 105, 106, 106, 105,
+                104, 105, 105, 107, 106, 107, 107, 108, 109, 110
             };
             var history = GenerateHistoricalData(priceList.Count, prices: priceList);
             var current = history.Last();
