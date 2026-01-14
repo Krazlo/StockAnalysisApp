@@ -3,7 +3,7 @@ using StockDataService.Models;
 using StockDataService.Services;
 using System.Text.Json;
 
-namespace MSTests.StockDataTests
+namespace MSTests.UnitTests
 {
     [TestClass]
     public class CalculateIndicatorsTests
@@ -240,7 +240,7 @@ namespace MSTests.StockDataTests
 
             var filePath = Path.Combine(
                 AppContext.BaseDirectory,
-                "StockDataTests",
+                "UnitTests",
                 "json",
                 "eodhd-nkt-sample-response.json"
             );

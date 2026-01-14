@@ -107,11 +107,14 @@ namespace StockDataService.Services
             if (prices.Count < period) return 0;
 
             decimal multiplier = 2m / (period + 1);
-            decimal ema = prices.Take(period).Average(); // Start with SMA
 
-            foreach (var price in prices.Skip(period))
+            decimal ema = 0;
+            for (int i = 0; i < period; i++) ema += prices[i];
+            ema /= period;
+
+            for (int i = period; i < prices.Count; i++)
             {
-                ema = (price - ema) * multiplier + ema;
+                ema = (prices[i] - ema) * multiplier + ema;
             }
 
             return ema;
@@ -119,24 +122,36 @@ namespace StockDataService.Services
 
         private decimal CalculateRSI(List<decimal> prices, int period)
         {
-            if (prices.Count < period + 1) return 0;
+            //50 is the midpoint of the RSI scale
+            if (prices.Count <= period) return 50;
 
-            var changes = new List<decimal>();
-            for (int i = 1; i < prices.Count; i++)
+            decimal maU = 0;
+            decimal maD = 0;
+
+            for (int i = 1; i <= period; i++)
             {
-                changes.Add(prices[i] - prices[i - 1]);
+                decimal change = prices[i] - prices[i - 1];
+                maU += change > 0 ? change : 0;
+                maD += change < 0 ? Math.Abs(change) : 0;
             }
 
-            var recentChanges = changes.TakeLast(period).ToList();
-            var gains = recentChanges.Where(c => c > 0).DefaultIfEmpty(0).Average();
-            var losses = Math.Abs(recentChanges.Where(c => c < 0).DefaultIfEmpty(0).Average());
+            maU /= period;
+            maD /= period;
 
-            if (losses == 0) return 100;
+            for (int i = period + 1; i < prices.Count; i++)
+            {
+                decimal change = prices[i] - prices[i - 1];
+                decimal u = change > 0 ? change : 0;
+                decimal d = change < 0 ? Math.Abs(change) : 0;
 
-            decimal rs = gains / losses;
-            decimal rsi = 100 - (100 / (1 + rs));
+                maU = (u + maU * (period - 1)) / period;
+                maD = (d + maD * (period - 1)) / period;
+            }
 
-            return rsi;
+            if (maD == 0) return 100;
+
+            decimal rs = maU / maD;
+            return 100 - (100 / (1 + rs));
         }
 
         private (decimal Line, decimal Signal, decimal Histogram) CalculateMACD(List<decimal> prices)
