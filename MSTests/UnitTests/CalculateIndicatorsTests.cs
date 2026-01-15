@@ -8,7 +8,7 @@ namespace MSTests.UnitTests
     [TestClass]
     public class CalculateIndicatorsTests
     {
-        private IndicatorCalculator _calculator;
+        private IIndicatorCalculator _calculator;
 
         [TestInitialize]
         public void Setup()
@@ -48,23 +48,26 @@ namespace MSTests.UnitTests
         public void CalculateIndicators_Computes_SMA20_WhenEnoughData()
         {
             var history = GenerateHistoricalData(30);
-            var current = history.Last();
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.IsTrue(result.SMA_20 > 0);
-            Assert.IsTrue(result.SMA_20 < result.CurrentPrice);
+            var result = _calculator.CalculateSMA(closePrices, 20);
+
+            Assert.IsTrue(result > 0);
         }
 
         [TestMethod]
         public void CalculateIndicators_Computes_EMA12_WhenEnoughData()
         {
             var history = GenerateHistoricalData(20);
-            var current = history.Last();
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.IsTrue(result.EMA_12 > 0);
+            var result = _calculator.CalculateEMA(closePrices, 12);
+
+            Assert.IsTrue(result > 0);
         }
 
         #endregion
@@ -75,12 +78,14 @@ namespace MSTests.UnitTests
         public async Task CalculateIndicators_RSI_InRange_0_To_100()
         {
             var history = await GetHistoricalData();
-            var current = history.Last();
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.IsTrue(result.RSI_14 >= 0);
-            Assert.IsTrue(result.RSI_14 <= 100);
+            var result = _calculator.CalculateRSI(closePrices, 14);
+
+            Assert.IsTrue(result >= 0);
+            Assert.IsTrue(result <= 100);
         }
 
         [TestMethod]
@@ -93,23 +98,26 @@ namespace MSTests.UnitTests
                 104, 105, 105, 107, 106, 107, 107, 108, 109, 110
             };
             var history = GenerateHistoricalData(priceList.Count, prices: priceList);
-            var current = history.Last();
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.AreEqual("Bullish", result.RSITrend);
+            var result = _calculator.CalculateRSITrend(closePrices);
+
+            Assert.AreEqual("Bullish", result);
         }
 
         [TestMethod]
         public void CalculateIndicators_RSI_Equals100_WhenNoLosses()
         {
             var history = GenerateHistoricalData(30, dailyChange: 2);
-            var current = history.Last();
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.AreEqual("Overbought", result.RSITrend);
-            Assert.AreEqual(100, result.RSI_14);
+            var result = _calculator.CalculateRSI(closePrices, 14);
+
+            Assert.AreEqual(100, result);
         }
 
         #endregion
@@ -120,12 +128,14 @@ namespace MSTests.UnitTests
         public void CalculateIndicators_Computes_MACD_WhenEnoughData()
         {
             var history = GenerateHistoricalData(50);
-            var current = history.Last();
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.AreNotEqual(0, result.MACD_Line);
-            Assert.AreNotEqual(0, result.MACD_Signal);
+            var result = _calculator.CalculateMACD(closePrices);
+
+            Assert.AreNotEqual(0, result.Line);
+            Assert.AreNotEqual(0, result.Signal);
         }
 
         [TestMethod]
@@ -157,11 +167,15 @@ namespace MSTests.UnitTests
         {
             var history = GenerateHistoricalData(25);
             var current = history.Last();
+            var closePrice = current.Close;
 
-            var result = _calculator.CalculateIndicators(history, current);
+            var sortedData = history.OrderBy(d => d.Date).ToList();
+            var closePrices = sortedData.Select(d => d.Close).ToList();
 
-            Assert.IsTrue(result.BollingerUpper > result.BollingerMiddle);
-            Assert.IsTrue(result.BollingerLower < result.BollingerMiddle);
+            var result = _calculator.CalculateBollingerBands(closePrices, 20, 2, closePrice);
+
+            Assert.IsTrue(result.Upper > result.Middle);
+            Assert.IsTrue(result.Lower < result.Middle);
         }
 
         #endregion

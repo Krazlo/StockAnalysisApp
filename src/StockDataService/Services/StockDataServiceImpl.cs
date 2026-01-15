@@ -132,6 +132,7 @@ namespace StockDataService.Services
             _logger.LogInformation($"BollingerUpper = {indicators.BollingerUpper}");
             _logger.LogInformation($"BollingerMiddle = {indicators.BollingerMiddle}");
             _logger.LogInformation($"BollingerLower = {indicators.BollingerLower}");
+            _logger.LogInformation($"BollingerPercentB = {indicators.BollingerPercentB}");
             _logger.LogInformation($"AverageVolume_20 = {indicators.AverageVolume_20}");
             _logger.LogInformation($"VolumeChangePercent = {indicators.VolumeChangePercent}");
 

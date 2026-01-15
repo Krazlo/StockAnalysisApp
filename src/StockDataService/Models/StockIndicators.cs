@@ -23,6 +23,7 @@ namespace StockDataService.Models
         public decimal BollingerUpper { get; set; }
         public decimal BollingerMiddle { get; set; }
         public decimal BollingerLower { get; set; }
+        public decimal BollingerPercentB { get; set; }
 
         // Volume Analysis
         public long AverageVolume_20 { get; set; }

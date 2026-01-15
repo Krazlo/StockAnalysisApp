@@ -238,6 +238,7 @@ namespace AIAnalysisService.Services
                 sb.AppendLine($"- Upper Band: ${indicators.BollingerUpper:F2}");
                 sb.AppendLine($"- Middle Band: ${indicators.BollingerMiddle:F2}");
                 sb.AppendLine($"- Lower Band: ${indicators.BollingerLower:F2}");
+                sb.AppendLine($"- %B: ${indicators.BollingerPercentB:F2}");
                 sb.AppendLine();
 
                 sb.AppendLine("Volume Analysis:");
@@ -270,6 +271,7 @@ namespace AIAnalysisService.Services
                 _logger.LogInformation($"BollingerUpper = {indicators.BollingerUpper}");
                 _logger.LogInformation($"BollingerMiddle = {indicators.BollingerMiddle}");
                 _logger.LogInformation($"BollingerLower = {indicators.BollingerLower}");
+                _logger.LogInformation($"BollingerPercentB = {indicators.BollingerPercentB}");
                 _logger.LogInformation($"AverageVolume_20 = {indicators.AverageVolume_20}");
                 _logger.LogInformation($"VolumeChangePercent = {indicators.VolumeChangePercent}");
 

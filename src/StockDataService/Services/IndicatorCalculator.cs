@@ -56,10 +56,11 @@ namespace StockDataService.Services
             // Calculate Bollinger Bands
             if (closePrices.Count >= 20)
             {
-                var bollinger = CalculateBollingerBands(closePrices, 20, 2);
+                var bollinger = CalculateBollingerBands(closePrices, 20, 2, indicators.CurrentPrice); //2 standard deviations cover approximately 95% of all data points
                 indicators.BollingerUpper = bollinger.Upper;
                 indicators.BollingerMiddle = bollinger.Middle;
                 indicators.BollingerLower = bollinger.Lower;
+                indicators.BollingerPercentB = bollinger.PercentB;
             }
 
             // Volume Analysis
@@ -96,13 +97,13 @@ namespace StockDataService.Services
             return indicators;
         }
 
-        private decimal CalculateSMA(List<decimal> prices, int period)
+        public decimal CalculateSMA(List<decimal> prices, int period)
         {
             if (prices.Count < period) return 0;
             return prices.TakeLast(period).Average();
         }
 
-        private decimal CalculateEMA(List<decimal> prices, int period)
+        public decimal CalculateEMA(List<decimal> prices, int period)
         {
             if (prices.Count < period) return 0;
 
@@ -120,7 +121,7 @@ namespace StockDataService.Services
             return ema;
         }
 
-        private decimal CalculateRSI(List<decimal> prices, int period)
+        public decimal CalculateRSI(List<decimal> prices, int period)
         {
             //50 is the midpoint of the RSI scale
             if (prices.Count <= period) return 50;
@@ -151,10 +152,11 @@ namespace StockDataService.Services
             if (maD == 0) return 100;
 
             decimal rs = maU / maD;
-            return 100 - (100 / (1 + rs));
+            decimal rsi = 100 - (100 / (1 + rs));
+            return rsi;
         }
 
-        private (decimal Line, decimal Signal, decimal Histogram) CalculateMACD(List<decimal> prices)
+        public (decimal Line, decimal Signal, decimal Histogram) CalculateMACD(List<decimal> prices)
         {
             var ema12Series = CalculateEMASeries(prices, 12);
             var ema26Series = CalculateEMASeries(prices, 26);
@@ -179,7 +181,7 @@ namespace StockDataService.Services
             return (macdLine, signalLine, histogram);
         }
 
-        private List<decimal?> CalculateEMASeries(List<decimal> prices, int period)
+        public List<decimal?> CalculateEMASeries(List<decimal> prices, int period)
         {
             var result = new List<decimal?>();
             decimal multiplier = 2m / (period + 1);
@@ -197,7 +199,7 @@ namespace StockDataService.Services
                 else
                 {
                     var prevEma = result[i - 1]!.Value;
-                    var ema = (prices[i] - prevEma) * multiplier + prevEma;
+                    var ema = prevEma + multiplier * (prices[i] - prevEma);
                     result.Add(ema);
                 }
             }
@@ -205,24 +207,28 @@ namespace StockDataService.Services
             return result;
         }
 
-        private (decimal Upper, decimal Middle, decimal Lower) CalculateBollingerBands(List<decimal> prices, int period, decimal standardDeviations)
+        public (decimal Upper, decimal Middle, decimal Lower, decimal PercentB) CalculateBollingerBands(List<decimal> prices, int period, decimal deviation, decimal currentPrice)
         {
-            if (prices.Count < period) return (0, 0, 0);
+            if (prices.Count < period) return (0, 0, 0, 0);
 
             decimal sma = CalculateSMA(prices, period);
             var recentPrices = prices.TakeLast(period).ToList();
 
             // Calculate standard deviation
             decimal variance = recentPrices.Sum(p => (p - sma) * (p - sma)) / period;
-            decimal stdDev = (decimal)Math.Sqrt((double)variance);
+            decimal sigma = (decimal)Math.Sqrt((double)variance);
 
-            decimal upper = sma + (standardDeviations * stdDev);
-            decimal lower = sma - (standardDeviations * stdDev);
+            decimal upper = sma + (sigma * deviation);
+            decimal lower = sma - (sigma * deviation);
 
-            return (upper, sma, lower);
+            // %B
+            decimal bandwidth = upper - lower;
+
+            decimal percentB = bandwidth == 0 ? 0.5m : (currentPrice - lower) / bandwidth;
+            return (upper, sma, lower, percentB);
         }
 
-        private decimal CalculateDayChangePercent(List<StockData> sortedData, StockData currentData)
+        public decimal CalculateDayChangePercent(List<StockData> sortedData, StockData currentData)
         {
             if (sortedData.Count < 2) return 0;
 
@@ -231,7 +237,7 @@ namespace StockDataService.Services
             return ((currentData.Close - previousDay.Close) / previousDay.Close) * 100;
         }
 
-        private List<decimal> CalculateOBV(List<StockData> historicalData)
+        public List<decimal> CalculateOBV(List<StockData> historicalData)
         {
             var data = historicalData
                 .OrderBy(d => d.Date)
@@ -255,7 +261,7 @@ namespace StockDataService.Services
             return obv;
         }
 
-        private string CalculateOBVTrend(List<decimal> obv)
+        public string CalculateOBVTrend(List<decimal> obv)
         {
             if (obv.Count < 10)
                 return "Neutral";
@@ -270,7 +276,7 @@ namespace StockDataService.Services
             return "Neutral";
         }
 
-        private string CalculateRSITrend(List<decimal> prices)
+        public string CalculateRSITrend(List<decimal> prices)
         {
             if (prices.Count < 15)
                 return "Neutral";
@@ -297,7 +303,7 @@ namespace StockDataService.Services
             return "Neutral";
         }
 
-        private string CalculateMACDState(decimal macd, decimal signal, decimal histogram)
+        public string CalculateMACDState(decimal macd, decimal signal, decimal histogram)
         {
             if (macd > signal && histogram > 0)
                 return "Bullish";

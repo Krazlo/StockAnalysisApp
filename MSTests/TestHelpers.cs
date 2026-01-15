@@ -25,6 +25,7 @@ namespace MSTests
                 BollingerUpper = 1,
                 BollingerMiddle = 1,
                 BollingerLower = 1,
+                BollingerPercentB = 1,
                 AverageVolume_20 = 1,
                 VolumeChangePercent = 1,
                 CurrentPrice = 1,
